@@ -1,0 +1,41 @@
+.blog-container {
+  max-width: 800px;
+  margin: 60px auto;
+  background: white;
+  padding: 40px;
+  border-radius: 10px;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+}
+
+.blog-title {
+  font-size: 34px;
+  margin-bottom: 20px;
+}
+
+.blog-tags {
+  margin-bottom: 25px;
+}
+
+.tag {
+  background: #eef2ff;
+  padding: 6px 10px;
+  margin-right: 8px;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.blog-content {
+  line-height: 1.7;
+  font-size: 17px;
+  color: #333;
+}
+
+.blog-content h1,
+.blog-content h2,
+.blog-content h3 {
+  margin-top: 30px;
+}
+
+.blog-content p {
+  margin: 16px 0;
+}
