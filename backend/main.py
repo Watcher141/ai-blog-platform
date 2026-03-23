@@ -24,8 +24,9 @@ engine = BlogEngine()
 origins = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "https://ai-blog-platform-pi.vercel.app",
-    "https://ai-blog-platform-pi.vercel.app/",
+    "https://ai-blog-platform-eohe.vercel.app",
+    "https://ai-blog-platform-eohe.vercel.app/",
+    "https://ai-blog-platform-eohe-8uqjodomm-monojit-das-projects.vercel.app",
 ]
 
 app.add_middleware(
