@@ -7,6 +7,8 @@ import MyBlogsPage from "./pages/MyBlogsPage";
 import BlogViewPage from "./pages/BlogViewPage";
 import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/ProtectedRoute";
+import ProfilePage from "./pages/ProfilePage";
+import EditProfilePage from "./pages/EditProfilePage";
 
 function App() {
   // ✅ REMOVED the duplicate onAuthStateChanged from here
@@ -25,6 +27,15 @@ function App() {
           element={
             <ProtectedRoute>
               <MyBlogsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/u/:username" element={<ProfilePage />} />
+        <Route
+          path="/profile/edit"
+          element={
+            <ProtectedRoute>
+              <EditProfilePage />
             </ProtectedRoute>
           }
         />

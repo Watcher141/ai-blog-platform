@@ -1,0 +1,128 @@
+.like-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  color: var(--text-secondary);
+  padding: 9px 18px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.like-btn:hover:not(:disabled) {
+  background: var(--glass-bg-hover);
+  border-color: var(--glass-border-hover);
+  color: var(--text-primary);
+}
+
+.like-btn.liked {
+  background: rgba(248, 113, 113, 0.1);
+  border-color: rgba(248, 113, 113, 0.3);
+  color: #f87171;
+}
+
+.like-btn.liked:hover {
+  background: rgba(248, 113, 113, 0.15);
+}
+
+.like-icon {
+  font-size: 16px;
+}
+.like-count {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.login-prompt-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: fadeIn 0.2s ease both;
+}
+
+.login-prompt {
+  background: #111;
+  border: 1px solid var(--glass-border-hover);
+  border-radius: var(--radius-xl);
+  padding: 36px;
+  max-width: 380px;
+  width: 100%;
+  text-align: center;
+  animation: fadeUp 0.3s ease both;
+}
+
+.login-prompt h3 {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 400;
+  margin-bottom: 10px;
+}
+
+.login-prompt p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.login-prompt-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.login-prompt-btn-primary {
+  background: var(--text-primary);
+  color: #080808;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 13px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: var(--transition);
+}
+.login-prompt-btn-primary:hover {
+  opacity: 0.85;
+}
+
+.login-prompt-btn-secondary {
+  background: var(--glass-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--glass-border-hover);
+  border-radius: var(--radius-md);
+  padding: 13px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: var(--transition);
+}
+.login-prompt-btn-secondary:hover {
+  background: var(--glass-bg-hover);
+}
+
+.login-prompt-close {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  padding: 8px;
+  transition: var(--transition);
+}
+.login-prompt-close:hover {
+  color: var(--text-secondary);
+}

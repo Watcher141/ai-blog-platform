@@ -102,7 +102,9 @@ class BlogEngine:
             "title": blog.title,
             "content": blog.content,
             "tags": blog.tags,
-            "status": blog.status
+            "status": blog.status,
+            "user_id": blog.user_id,
+            "cover_image": blog.cover_image  # ✅
         }
 
         set_cache(cache_key, response)
@@ -132,8 +134,7 @@ class BlogEngine:
     def seo_analyze(self, title: str, content: str) -> dict:
         try:
             response = llm.invoke(seo_prompt.format(
-                title=title,
-                content=content[:2000]
+                title=title, content=content[:2000]
             ))
             raw = response.content.strip()
             raw = re.sub(r"^```(?:json)?\n?", "", raw)
@@ -146,8 +147,7 @@ class BlogEngine:
     def summarize(self, title: str, content: str) -> str:
         try:
             response = llm.invoke(summarize_prompt.format(
-                title=title,
-                content=content[:3000]
+                title=title, content=content[:3000]
             ))
             return response.content.strip()
         except Exception as e:
@@ -159,18 +159,13 @@ class BlogEngine:
         query_lower = query.lower()
         results = []
         for b in blogs:
-            title = (b.title or "").lower()
-            content = (b.content or "").lower()
-            tags = (b.tags or "").lower()
-            if (query_lower in title or
-                query_lower in content or
-                query_lower in tags):
+            if (query_lower in (b.title or "").lower() or
+                query_lower in (b.content or "").lower() or
+                query_lower in (b.tags or "").lower()):
                 results.append({
-                    "id": b.id,
-                    "title": b.title,
-                    "content": b.content,
-                    "tags": b.tags,
-                    "status": b.status
+                    "id": b.id, "title": b.title, "content": b.content,
+                    "tags": b.tags, "status": b.status, "user_id": b.user_id,
+                    "cover_image": b.cover_image  # ✅
                 })
         return results
 
@@ -183,11 +178,9 @@ class BlogEngine:
             status="draft"
         )
         return {
-            "id": blog.id,
-            "title": blog.title,
-            "content": blog.content,
-            "tags": blog.tags,
-            "status": blog.status
+            "id": blog.id, "title": blog.title, "content": blog.content,
+            "tags": blog.tags, "status": blog.status, "user_id": blog.user_id,
+            "cover_image": blog.cover_image  # ✅
         }
 
     def publish_draft(self, blog_id: int) -> dict:
@@ -195,22 +188,18 @@ class BlogEngine:
         if not blog:
             return {"error": "Blog not found"}
         return {
-            "id": blog.id,
-            "title": blog.title,
-            "content": blog.content,
-            "tags": blog.tags,
-            "status": blog.status
+            "id": blog.id, "title": blog.title, "content": blog.content,
+            "tags": blog.tags, "status": blog.status, "user_id": blog.user_id,
+            "cover_image": blog.cover_image  # ✅
         }
 
     def get_drafts(self, user_id: str) -> list:
         blogs = get_user_blogs(user_id, status="draft")
         return [
             {
-                "id": b.id,
-                "title": b.title,
-                "content": b.content,
-                "tags": b.tags,
-                "status": b.status
+                "id": b.id, "title": b.title, "content": b.content,
+                "tags": b.tags, "status": b.status, "user_id": b.user_id,
+                "cover_image": b.cover_image  # ✅
             }
             for b in blogs
         ]
@@ -219,11 +208,9 @@ class BlogEngine:
         blogs = get_all_blogs()
         return [
             {
-                "id": b.id,
-                "title": b.title,
-                "content": b.content,
-                "tags": b.tags,
-                "status": b.status
+                "id": b.id, "title": b.title, "content": b.content,
+                "tags": b.tags, "status": b.status, "user_id": b.user_id,
+                "cover_image": b.cover_image  # ✅
             }
             for b in blogs
         ]
@@ -233,11 +220,9 @@ class BlogEngine:
         if not blog:
             return {"error": "Blog not found"}
         return {
-            "id": blog.id,
-            "title": blog.title,
-            "content": blog.content,
-            "tags": blog.tags,
-            "status": blog.status
+            "id": blog.id, "title": blog.title, "content": blog.content,
+            "tags": blog.tags, "status": blog.status, "user_id": blog.user_id,
+            "cover_image": blog.cover_image  # ✅
         }
 
     def delete_blog(self, blog_id: int):
@@ -250,11 +235,9 @@ class BlogEngine:
         blogs = get_user_blogs(user_id, status="published")
         return [
             {
-                "id": b.id,
-                "title": b.title,
-                "content": b.content,
-                "tags": b.tags,
-                "status": b.status
+                "id": b.id, "title": b.title, "content": b.content,
+                "tags": b.tags, "status": b.status, "user_id": b.user_id,
+                "cover_image": b.cover_image  # ✅
             }
             for b in blogs
         ]

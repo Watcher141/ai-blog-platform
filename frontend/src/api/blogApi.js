@@ -1,10 +1,7 @@
 import axios from "axios";
 
 const BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
-
-const API = axios.create({
-  baseURL: BASE_URL,
-});
+const API = axios.create({ baseURL: BASE_URL });
 
 export const fetchBlogs = () => API.get("/blogs");
 export const searchBlogs = (q) =>
@@ -48,3 +45,81 @@ export const analyzeSEO = (token, title, content) =>
   );
 export const summarizeBlog = (title, content) =>
   API.post("/blogs/summarize", { title, content });
+
+// Profile
+export const getMyProfile = (token) =>
+  API.get("/users/me/profile", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+export const createProfile = (token, data) =>
+  API.post("/users/me/profile", data, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+export const updateProfile = (token, data) =>
+  API.patch("/users/me/profile", data, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+export const getPublicProfile = (username) => API.get(`/u/${username}`);
+export const checkUsername = (username) =>
+  API.get(`/users/check-username/${username}`);
+
+// ✅ Likes
+export const toggleLike = (token, blogId) =>
+  API.post(
+    `/blogs/${blogId}/like`,
+    {},
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+export const getLikeStatus = (token, blogId) =>
+  API.get(`/blogs/${blogId}/like`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+// ✅ Comments
+export const getComments = (blogId) => API.get(`/blogs/${blogId}/comments`);
+export const addComment = (token, blogId, content) =>
+  API.post(
+    `/blogs/${blogId}/comments`,
+    { content },
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+export const deleteComment = (token, commentId) =>
+  API.delete(`/comments/${commentId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+// ✅ Follows
+export const toggleFollow = (token, uid) =>
+  API.post(
+    `/users/${uid}/follow`,
+    {},
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+export const getFollowStatus = (token, uid) =>
+  API.get(`/users/${uid}/follow`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+// ✅ Notifications
+export const getNotifications = (token) =>
+  API.get("/users/me/notifications", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+export const getUnreadCount = (token) =>
+  API.get("/users/me/notifications/unread", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+export const markNotificationsRead = (token) =>
+  API.post(
+    "/users/me/notifications/read",
+    {},
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+export const updateCoverImage = (token, blogId, coverImage) =>
+  API.patch(
+    `/blogs/${blogId}/cover`,
+    { cover_image: coverImage },
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  );
