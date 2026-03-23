@@ -15,11 +15,11 @@ from crud import (
     mark_all_read, get_unread_count,
     update_cover_image
 )
-from database import engine as db_engine  
+from database import engine as db_engine
 from models import Base
 
 app = FastAPI()
-engine = BlogEngine()  
+engine = BlogEngine()
 
 origins = [
     "http://localhost:3000",
@@ -92,6 +92,9 @@ class ProfileUpdateRequest(BaseModel):
 class CommentRequest(BaseModel):
     content: str
 
+class CoverImageRequest(BaseModel):
+    cover_image: str
+
 
 # ─── Routes ──────────────────────────────────────────────
 
@@ -135,7 +138,8 @@ def create_manual_blog(req: ManualBlogRequest, user=Depends(get_current_user)):
     )
     result = {
         "id": blog.id, "title": blog.title, "content": blog.content,
-        "tags": blog.tags, "status": blog.status, "user_id": blog.user_id
+        "tags": blog.tags, "status": blog.status, "user_id": blog.user_id,
+        "cover_image": blog.cover_image
     }
     return attach_author(result, user)
 
@@ -163,7 +167,6 @@ def publish_draft(blog_id: int, user=Depends(get_current_user)):
     result = engine.publish_draft(blog_id)
     if "error" in result:
         raise HTTPException(status_code=404, detail="Blog not found")
-    # Notify followers
     followers = get_followers_of_blog_author(result.get("user_id", ""))
     for follower_uid in followers:
         create_notification(
@@ -175,7 +178,7 @@ def publish_draft(blog_id: int, user=Depends(get_current_user)):
     return attach_author(result, user)
 
 @app.get("/blogs/{blog_id}")
-def get_blog(blog_id: int, user: str = None):
+def get_blog(blog_id: int):
     result = engine.get_blog(blog_id)
     if "error" in result:
         raise HTTPException(status_code=404, detail="Blog not found")
@@ -190,15 +193,20 @@ def delete_blog(blog_id: int):
         raise HTTPException(status_code=404, detail="Blog not found")
     return result
 
+@app.patch("/blogs/{blog_id}/cover")
+def update_blog_cover(blog_id: int, req: CoverImageRequest, user=Depends(get_current_user)):
+    blog = update_cover_image(blog_id, user, req.cover_image)
+    if not blog:
+        raise HTTPException(status_code=404, detail="Blog not found or not authorized")
+    return {"cover_image": blog.cover_image}
+
 # ── Likes ──
 
 @app.post("/blogs/{blog_id}/like")
 def like_blog(blog_id: int, user=Depends(get_current_user)):
     liked = toggle_like(blog_id, user)
     count = get_like_count(blog_id)
-
     if liked:
-        # notify blog author
         blog = engine.get_blog(blog_id)
         if blog and blog.get("user_id") and blog["user_id"] != user:
             liker_profile = get_profile_by_uid(user)
@@ -209,7 +217,6 @@ def like_blog(blog_id: int, user=Depends(get_current_user)):
                 message=f"{name} liked your blog: {blog['title']}",
                 link=f"/blogs/{blog_id}"
             )
-
     return {"liked": liked, "like_count": count}
 
 @app.get("/blogs/{blog_id}/like")
@@ -225,8 +232,6 @@ def add_comment(blog_id: int, req: CommentRequest, user=Depends(get_current_user
     if not req.content.strip():
         raise HTTPException(status_code=400, detail="Comment cannot be empty")
     comment = create_comment(blog_id, user, req.content.strip())
-
-    # notify blog author
     blog = engine.get_blog(blog_id)
     if blog and blog.get("user_id") and blog["user_id"] != user:
         commenter_profile = get_profile_by_uid(user)
@@ -237,7 +242,6 @@ def add_comment(blog_id: int, req: CommentRequest, user=Depends(get_current_user
             message=f"{name} commented on your blog: {blog['title']}",
             link=f"/blogs/{blog_id}"
         )
-
     profile = get_profile_by_uid(user)
     return {
         "id": comment.id,
@@ -283,7 +287,6 @@ def follow_user(uid: str, user=Depends(get_current_user)):
         raise HTTPException(status_code=400, detail="Cannot follow yourself")
     followed = toggle_follow(user, uid)
     count = get_follower_count(uid)
-
     if followed:
         follower_profile = get_profile_by_uid(user)
         name = f"@{follower_profile.username}" if follower_profile else "Someone"
@@ -293,7 +296,6 @@ def follow_user(uid: str, user=Depends(get_current_user)):
             message=f"{name} started following you",
             link=f"/u/{follower_profile.username}" if follower_profile else None
         )
-
     return {"following": followed, "follower_count": count}
 
 @app.get("/users/{uid}/follow")
@@ -314,11 +316,8 @@ def my_notifications(user=Depends(get_current_user)):
     notifs = get_notifications(user)
     return [
         {
-            "id": n.id,
-            "type": n.type,
-            "message": n.message,
-            "link": n.link,
-            "is_read": n.is_read,
+            "id": n.id, "type": n.type, "message": n.message,
+            "link": n.link, "is_read": n.is_read,
             "created_at": n.created_at.isoformat()
         }
         for n in notifs
@@ -408,7 +407,8 @@ def get_public_profile(username: str):
         "blogs": [
             {
                 "id": b.id, "title": b.title, "content": b.content,
-                "tags": b.tags, "status": b.status
+                "tags": b.tags, "status": b.status,
+                "cover_image": b.cover_image  # ✅ fixed
             }
             for b in blogs
         ]
@@ -424,19 +424,8 @@ def get_followers_of_blog_author(uid: str):
     from crud import get_followers
     return get_followers(uid)
 
-from crud import update_cover_image  # add to existing import
-
-class CoverImageRequest(BaseModel):
-    cover_image: str
-
-@app.patch("/blogs/{blog_id}/cover")
-def update_blog_cover(blog_id: int, req: CoverImageRequest, user=Depends(get_current_user)):
-    blog = update_cover_image(blog_id, user, req.cover_image)
-    if not blog:
-        raise HTTPException(status_code=404, detail="Blog not found or not authorized")
-    return {"cover_image": blog.cover_image}
 
 @app.on_event("startup")
 def startup():
-    Base.metadata.create_all(bind=db_engine)  
+    Base.metadata.create_all(bind=db_engine)
     print("✅ Database tables created/verified")

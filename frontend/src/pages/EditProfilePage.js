@@ -176,12 +176,22 @@ export default function EditProfilePage() {
               >
                 {showImgPicker ? "✕ Close" : "✦ Search Photo"}
               </button>
+              {/* ✅ Fix: use textarea-style input with no margin interference */}
               <input
                 className="ep-input ep-input-sm"
                 placeholder="Or paste image URL..."
                 value={avatarUrl}
-                onChange={(e) => setAvatarUrl(e.target.value)}
+                onChange={(e) => {
+                  setAvatarUrl(e.target.value);
+                }}
+                style={{ marginBottom: 0 }}
               />
+
+              {avatarUrl && !showImgPicker && (
+                <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>
+                  ✓ URL set — save to apply
+                </span>
+              )}
             </div>
           </div>
 

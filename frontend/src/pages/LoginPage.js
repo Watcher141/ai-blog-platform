@@ -2,8 +2,15 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import "../styles/auth.css";
-import { loginUser, loginWithGoogle, getToken } from "../firebase/authService";
+import {
+  loginUser,
+  loginWithGoogle,
+  getToken,
+  logoutUser,
+} from "../firebase/authService";
 import { setUser } from "../features/authSlice";
+import { getMyProfile } from "../api/blogApi";
+import { auth } from "../firebase/firebase";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -20,18 +27,42 @@ export default function LoginPage() {
           uid: firebaseUser.uid,
           email: firebaseUser.email,
           displayName: firebaseUser.displayName,
+          photoURL: firebaseUser.photoURL,
         },
         token,
       }),
     );
-    navigate("/");
+    return token;
   };
 
   const handleLogin = async () => {
     setError("");
     try {
       const res = await loginUser(email, password);
-      await dispatchUser(res.user);
+
+      // ✅ Block unverified emails
+      if (!res.user.emailVerified) {
+        await logoutUser();
+        setError(
+          "Please verify your email before logging in. Check your inbox.",
+        );
+        return;
+      }
+
+      const token = await dispatchUser(res.user);
+
+      // ✅ Check if profile exists — redirect to create if not
+      try {
+        const freshToken = await auth.currentUser.getIdToken(true);
+        const profileRes = await getMyProfile(freshToken);
+        if (!profileRes.data) {
+          navigate("/profile/edit");
+        } else {
+          navigate("/");
+        }
+      } catch {
+        navigate("/profile/edit");
+      }
     } catch {
       setError("Invalid email or password.");
     }
@@ -41,7 +72,21 @@ export default function LoginPage() {
     setError("");
     try {
       const res = await loginWithGoogle();
-      await dispatchUser(res.user);
+      // ✅ Google accounts are always verified
+      const token = await dispatchUser(res.user);
+
+      // ✅ Check if profile exists
+      try {
+        const freshToken = await auth.currentUser.getIdToken(true);
+        const profileRes = await getMyProfile(freshToken);
+        if (!profileRes.data) {
+          navigate("/profile/edit");
+        } else {
+          navigate("/");
+        }
+      } catch {
+        navigate("/profile/edit");
+      }
     } catch {
       setError("Google login failed.");
     }
@@ -57,7 +102,6 @@ export default function LoginPage() {
         <div className="auth-logo">
           <span className="auth-logo-dot" /> AI Blog
         </div>
-
         <h1 className="auth-title">
           Welcome
           <br />
