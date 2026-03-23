@@ -12,11 +12,14 @@ from crud import (
     toggle_follow, is_following, get_follower_count,
     get_following_count, get_following,
     create_notification, get_notifications,
-    mark_all_read, get_unread_count
+    mark_all_read, get_unread_count,
+    update_cover_image
 )
+from database import engine as db_engine  
+from models import Base
 
 app = FastAPI()
-engine = BlogEngine()
+engine = BlogEngine()  
 
 origins = [
     "http://localhost:3000",
@@ -431,3 +434,8 @@ def update_blog_cover(blog_id: int, req: CoverImageRequest, user=Depends(get_cur
     if not blog:
         raise HTTPException(status_code=404, detail="Blog not found or not authorized")
     return {"cover_image": blog.cover_image}
+
+@app.on_event("startup")
+def startup():
+    Base.metadata.create_all(bind=db_engine)  
+    print("✅ Database tables created/verified")
