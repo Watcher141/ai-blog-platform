@@ -18,7 +18,7 @@ export default function RegisterPage() {
     }
     try {
       await registerUser(email, password);
-      setDone(true); // ✅ show verification message
+      setDone(true); // show verification message
     } catch (err) {
       setError(err.message || "Registration failed.");
     }
@@ -28,7 +28,7 @@ export default function RegisterPage() {
     if (e.key === "Enter") handleRegister();
   };
 
-  // ✅ Show verification sent message
+  // Show verification sent message
   if (done) {
     return (
       <div className="auth-page">

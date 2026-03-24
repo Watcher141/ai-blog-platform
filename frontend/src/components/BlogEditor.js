@@ -8,7 +8,7 @@ import { getSuggestion } from "../api/blogApi";
 import { auth } from "../firebase/firebase";
 import "./BlogEditor.css";
 
-// ✅ Outside component — no dependency issue
+//Outside component — no dependency issue
 const BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
 
 export default function BlogEditor({

@@ -40,7 +40,7 @@ export default function BlogViewPage() {
   useEffect(() => {
     if (!blog) return;
 
-    // ✅ Use saved cover image if exists
+    // Use saved cover image if exists
     if (blog.cover_image) {
       setHeroImage({
         url: blog.cover_image,
@@ -58,15 +58,15 @@ export default function BlogViewPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [blog]);
 
-  // ✅ Only author can change image
+  // Only author can change image
   const isAuthor = user && blog?.user_id && user.uid === blog.user_id;
 
-  // ✅ Save image to DB
+  // Save image to DB
   const handleSaveImage = async (img) => {
     try {
       const token = await auth.currentUser.getIdToken(true);
       await updateCoverImage(token, parseInt(id), img.url);
-      // ✅ Update blog state so cover_image reflects the new value
+      // Update blog state so cover_image reflects the new value
       setBlog((prev) => ({ ...prev, cover_image: img.url }));
       setHeroImage(img);
       setShowImagePicker(false);
@@ -118,7 +118,7 @@ export default function BlogViewPage() {
           <img src={heroImage.url} alt={heroImage.alt} />
           <div className="blogview-hero-fade" />
 
-          {/* ✅ Only show credit for Unsplash images */}
+          {/* Only show credit for Unsplash images */}
           {heroImage.author && (
             <div className="blogview-hero-credit">
               Photo by{" "}
@@ -129,7 +129,7 @@ export default function BlogViewPage() {
             </div>
           )}
 
-          {/* ✅ Only author sees Change Image button */}
+          {/* Only author sees Change Image button */}
           {isAuthor && (
             <button
               className="blogview-change-img"
@@ -141,7 +141,7 @@ export default function BlogViewPage() {
         </div>
       )}
 
-      {/* ✅ Image Picker — only for author, saves to DB on click */}
+      {/* Image Picker — only for author, saves to DB on click */}
       {showImagePicker && isAuthor && (
         <div className="blogview-img-picker">
           <div className="container">

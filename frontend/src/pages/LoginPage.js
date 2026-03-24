@@ -40,7 +40,7 @@ export default function LoginPage() {
     try {
       const res = await loginUser(email, password);
 
-      // ✅ Block unverified emails
+      // Block unverified emails
       if (!res.user.emailVerified) {
         await logoutUser();
         setError(
@@ -49,9 +49,9 @@ export default function LoginPage() {
         return;
       }
 
-      const token = await dispatchUser(res.user);
+      await dispatchUser(res.user);
 
-      // ✅ Check if profile exists — redirect to create if not
+      // Check if profile exists — redirect to create if not
       try {
         const freshToken = await auth.currentUser.getIdToken(true);
         const profileRes = await getMyProfile(freshToken);
@@ -72,10 +72,10 @@ export default function LoginPage() {
     setError("");
     try {
       const res = await loginWithGoogle();
-      // ✅ Google accounts are always verified
-      const token = await dispatchUser(res.user);
+      //Google accounts are always verified
+      await dispatchUser(res.user);
 
-      // ✅ Check if profile exists
+      //Check if profile exists
       try {
         const freshToken = await auth.currentUser.getIdToken(true);
         const profileRes = await getMyProfile(freshToken);

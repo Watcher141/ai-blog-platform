@@ -18,7 +18,7 @@ export default function BlogCard({ blog }) {
   const searchQuery = blog.title || tagsArray[0] || "writing";
 
   useEffect(() => {
-    // ✅ Use saved cover image if exists — don't fetch from Unsplash
+    //Use saved cover image if exists — don't fetch from Unsplash
     if (blog.cover_image) {
       setCoverImage(blog.cover_image);
       return;

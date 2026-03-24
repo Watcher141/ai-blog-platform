@@ -28,10 +28,10 @@ export default function EditProfilePage() {
   const [displayName, setDisplayName] = useState("");
   const [bio, setBio] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
-  const [usernameStatus, setUsernameStatus] = useState(""); // "available" | "taken" | ""
+  const [urlInput, setUrlInput] = useState(""); // separate state for URL input
+  const [usernameStatus, setUsernameStatus] = useState("");
   const [checkingUsername, setCheckingUsername] = useState(false);
 
-  // Image search
   const [imgQuery, setImgQuery] = useState("");
   const [imgResults, setImgResults] = useState([]);
   const [imgLoading, setImgLoading] = useState(false);
@@ -52,6 +52,7 @@ export default function EditProfilePage() {
           setDisplayName(res.data.display_name || "");
           setBio(res.data.bio || "");
           setAvatarUrl(res.data.avatar_url || "");
+          setUrlInput(res.data.avatar_url || "");
         } else {
           setIsNew(true);
         }
@@ -63,6 +64,13 @@ export default function EditProfilePage() {
     };
     load();
   }, [user, navigate]);
+
+  // Apply URL to avatar when user finishes typing (on blur or Enter)
+  const handleUrlApply = () => {
+    if (urlInput.trim()) {
+      setAvatarUrl(urlInput.trim());
+    }
+  };
 
   const handleUsernameChange = async (val) => {
     setUsername(val);
@@ -164,7 +172,11 @@ export default function EditProfilePage() {
           <div className="editprofile-avatar-section">
             <div className="editprofile-avatar">
               {avatarUrl ? (
-                <img src={avatarUrl} alt="avatar" />
+                <img
+                  src={avatarUrl}
+                  alt="avatar"
+                  onError={() => setAvatarUrl("")} // clear if URL is broken
+                />
               ) : (
                 <span>{username?.slice(0, 2).toUpperCase() || "?"}</span>
               )}
@@ -176,21 +188,32 @@ export default function EditProfilePage() {
               >
                 {showImgPicker ? "✕ Close" : "✦ Search Photo"}
               </button>
-              {/* ✅ Fix: use textarea-style input with no margin interference */}
-              <input
-                className="ep-input ep-input-sm"
-                placeholder="Or paste image URL..."
-                value={avatarUrl}
-                onChange={(e) => {
-                  setAvatarUrl(e.target.value);
-                }}
-                style={{ marginBottom: 0 }}
-              />
 
-              {avatarUrl && !showImgPicker && (
-                <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>
-                  ✓ URL set — save to apply
-                </span>
+              {/* URL paste — separate state, applies on blur or Enter */}
+              <div className="ep-url-wrap">
+                <input
+                  className="ep-input ep-input-sm"
+                  placeholder="Or paste image URL..."
+                  value={urlInput}
+                  onChange={(e) => setUrlInput(e.target.value)}
+                  onBlur={handleUrlApply}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleUrlApply();
+                    }
+                  }}
+                  style={{ marginBottom: 0 }}
+                />
+                {urlInput && urlInput !== avatarUrl && (
+                  <button className="ep-apply-url-btn" onClick={handleUrlApply}>
+                    Apply
+                  </button>
+                )}
+              </div>
+
+              {avatarUrl && (
+                <span className="ep-url-hint">✓ Preview updated</span>
               )}
             </div>
           </div>
@@ -221,6 +244,7 @@ export default function EditProfilePage() {
                     className="ep-img-item"
                     onClick={() => {
                       setAvatarUrl(img.full);
+                      setUrlInput(img.full);
                       setShowImgPicker(false);
                     }}
                   >
