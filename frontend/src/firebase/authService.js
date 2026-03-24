@@ -12,7 +12,7 @@ const provider = new GoogleAuthProvider();
 
 export const registerUser = async (email, password) => {
   const res = await createUserWithEmailAndPassword(auth, email, password);
-  // ✅ Send verification email immediately after register
+  //Send verification email immediately after register
   await sendEmailVerification(res.user);
   return res;
 };

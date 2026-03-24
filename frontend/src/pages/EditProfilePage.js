@@ -28,7 +28,8 @@ export default function EditProfilePage() {
   const [displayName, setDisplayName] = useState("");
   const [bio, setBio] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
-  const [urlInput, setUrlInput] = useState(""); // separate state for URL input
+  const [urlInput, setUrlInput] = useState("");
+  const [imgError, setImgError] = useState(false); // ✅ track broken image separately
   const [usernameStatus, setUsernameStatus] = useState("");
   const [checkingUsername, setCheckingUsername] = useState(false);
 
@@ -65,10 +66,15 @@ export default function EditProfilePage() {
     load();
   }, [user, navigate]);
 
-  // Apply URL to avatar when user finishes typing (on blur or Enter)
-  const handleUrlApply = () => {
-    if (urlInput.trim()) {
-      setAvatarUrl(urlInput.trim());
+  // Apply URL immediately as user types — no blur needed
+  const handleUrlChange = (e) => {
+    const val = e.target.value;
+    setUrlInput(val);
+    setImgError(false); // reset error on new input
+    if (val.trim()) {
+      setAvatarUrl(val.trim());
+    } else {
+      setAvatarUrl("");
     }
   };
 
@@ -130,7 +136,8 @@ export default function EditProfilePage() {
         username: username.trim(),
         display_name: displayName.trim() || null,
         bio: bio.trim() || null,
-        avatar_url: avatarUrl.trim() || null,
+        // Don't save broken image URLs
+        avatar_url: avatarUrl.trim() && !imgError ? avatarUrl.trim() : null,
       };
       if (isNew) {
         await createProfile(token, data);
@@ -171,11 +178,11 @@ export default function EditProfilePage() {
           {/* Avatar */}
           <div className="editprofile-avatar-section">
             <div className="editprofile-avatar">
-              {avatarUrl ? (
+              {avatarUrl && !imgError ? (
                 <img
                   src={avatarUrl}
                   alt="avatar"
-                  onError={() => setAvatarUrl("")} // clear if URL is broken
+                  onError={() => setImgError(true)} // ✅ just flag as error, don't clear URL
                 />
               ) : (
                 <span>{username?.slice(0, 2).toUpperCase() || "?"}</span>
@@ -189,31 +196,23 @@ export default function EditProfilePage() {
                 {showImgPicker ? "✕ Close" : "✦ Search Photo"}
               </button>
 
-              {/* URL paste — separate state, applies on blur or Enter */}
+              {/* ✅ URL paste — updates avatar live as you type */}
               <div className="ep-url-wrap">
                 <input
                   className="ep-input ep-input-sm"
                   placeholder="Or paste image URL..."
                   value={urlInput}
-                  onChange={(e) => setUrlInput(e.target.value)}
-                  onBlur={handleUrlApply}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      handleUrlApply();
-                    }
-                  }}
+                  onChange={handleUrlChange}
                   style={{ marginBottom: 0 }}
                 />
-                {urlInput && urlInput !== avatarUrl && (
-                  <button className="ep-apply-url-btn" onClick={handleUrlApply}>
-                    Apply
-                  </button>
-                )}
               </div>
 
-              {avatarUrl && (
+              {/* Status indicators */}
+              {avatarUrl && !imgError && urlInput && (
                 <span className="ep-url-hint">✓ Preview updated</span>
+              )}
+              {imgError && urlInput && (
+                <span className="ep-url-error">✕ Invalid image URL</span>
               )}
             </div>
           </div>
@@ -245,6 +244,7 @@ export default function EditProfilePage() {
                     onClick={() => {
                       setAvatarUrl(img.full);
                       setUrlInput(img.full);
+                      setImgError(false);
                       setShowImgPicker(false);
                     }}
                   >
