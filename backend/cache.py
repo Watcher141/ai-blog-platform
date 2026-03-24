@@ -4,16 +4,16 @@ import os
 
 REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379")
 
-# ✅ Fix missing scheme
+# Fix missing scheme
 if REDIS_URL and not REDIS_URL.startswith(("redis://", "rediss://", "unix://")):
     REDIS_URL = "redis://" + REDIS_URL
 
 try:
     redis_client = redis.from_url(REDIS_URL, decode_responses=True)
     redis_client.ping()
-    print("✅ Redis connected!")
+    print("Redis connected!")
 except Exception as e:
-    print(f"⚠️ Redis connection failed: {e}")
+    print(f"Redis connection failed: {e}")
     redis_client = None
 
 

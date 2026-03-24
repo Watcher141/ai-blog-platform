@@ -29,7 +29,7 @@ def get_current_user(
     try:
         decoded_token = auth.verify_id_token(
             token,
-            clock_skew_seconds=60  # ✅ allow 60 seconds of clock skew
+            clock_skew_seconds=60  # allow 60 seconds of clock skew
         )
         uid = decoded_token["uid"]
         return uid

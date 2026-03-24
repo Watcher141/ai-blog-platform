@@ -27,6 +27,8 @@ origins = [
     "https://ai-blog-platform-eohe.vercel.app",
     "https://ai-blog-platform-eohe.vercel.app/",
     "https://ai-blog-platform-eohe-8uqjodomm-monojit-das-projects.vercel.app",
+    "https://ai-blog-platform-green.vercel.app",       # new
+    "https://ai-blog-platform-green.vercel.app/",      # new
 ]
 
 app.add_middleware(
