@@ -5,3 +5,25 @@
   top: 0;
   left: 0;
 }
+/* =========================
+   RESPONSIVE FIX (DITHER)
+   ========================= */
+
+/* Ensure it never blocks interaction */
+.dither-container {
+  pointer-events: none;
+}
+
+/* Mobile optimization */
+@media (max-width: 768px) {
+  .dither-container {
+    opacity: 0.6; /* reduce visual noise */
+  }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+  .dither-container {
+    opacity: 0.4; /* lighter for performance + clarity */
+  }
+}

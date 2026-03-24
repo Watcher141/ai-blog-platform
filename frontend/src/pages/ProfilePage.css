@@ -200,3 +200,109 @@
   align-items: baseline;
   gap: 5px;
 }
+/* =========================
+   RESPONSIVE FIX (PROFILE)
+   ========================= */
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .profile-display-name {
+    font-size: 30px;
+  }
+
+  .profile-avatar {
+    width: 80px;
+    height: 80px;
+    font-size: 24px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .profile-page {
+    padding: 40px 0 60px;
+  }
+
+  /* KEY FIX: stack hero */
+  .profile-hero {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .profile-avatar {
+    width: 72px;
+    height: 72px;
+    font-size: 22px;
+  }
+
+  .profile-display-name {
+    font-size: 26px;
+  }
+
+  .profile-username {
+    font-size: 13px;
+  }
+
+  .profile-bio {
+    font-size: 14px;
+    max-width: 100%;
+  }
+
+  /* Name row (buttons) */
+  .profile-name-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .follow-btn,
+  .edit-profile-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  /* Stats */
+  .profile-stats {
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .profile-stat-num {
+    font-size: 22px;
+  }
+
+  .profile-stat-label {
+    font-size: 12px;
+  }
+
+  /* Section */
+  .profile-blogs-title {
+    font-size: 20px;
+  }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+  .profile-avatar {
+    width: 64px;
+    height: 64px;
+    font-size: 20px;
+  }
+
+  .profile-display-name {
+    font-size: 22px;
+  }
+
+  .profile-bio {
+    font-size: 13px;
+  }
+
+  .profile-stat-num {
+    font-size: 20px;
+  }
+
+  .profile-blogs-title {
+    font-size: 18px;
+  }
+}

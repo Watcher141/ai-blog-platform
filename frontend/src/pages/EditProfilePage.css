@@ -329,3 +329,151 @@
   font-size: 11px;
   color: #f87171;
 }
+/* =========================
+   RESPONSIVE FIX (EDIT PROFILE)
+   ========================= */
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .editprofile-box {
+    padding: 36px 32px;
+  }
+
+  .editprofile-title {
+    font-size: 30px;
+  }
+
+  .editprofile-avatar {
+    width: 70px;
+    height: 70px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .editprofile-page {
+    padding: 40px 0 60px;
+  }
+
+  .editprofile-box {
+    padding: 24px 18px;
+    border-radius: var(--radius-lg);
+  }
+
+  .editprofile-title {
+    font-size: 26px;
+  }
+
+  .editprofile-sub {
+    font-size: 13px;
+  }
+
+  /* KEY FIX: stack avatar section */
+  .editprofile-avatar-section {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .editprofile-avatar {
+    width: 64px;
+    height: 64px;
+    font-size: 20px;
+  }
+
+  .editprofile-avatar-actions {
+    width: 100%;
+  }
+
+  .ep-img-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  /* Image picker */
+  .ep-img-search {
+    flex-direction: column;
+  }
+
+  .ep-search-btn {
+    width: 100%;
+  }
+
+  .ep-img-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .ep-img-item {
+    height: 70px;
+  }
+
+  /* Inputs */
+  .ep-input,
+  .ep-textarea {
+    font-size: 13px;
+    padding: 10px 12px;
+  }
+
+  .ep-input-sm {
+    font-size: 12px;
+  }
+
+  /* Username */
+  .ep-at {
+    font-size: 13px;
+    padding: 10px 6px 10px 12px;
+  }
+
+  .ep-input-username {
+    font-size: 13px;
+    padding: 10px 10px 10px 0;
+  }
+
+  /* URL section */
+  .ep-url-wrap {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ep-apply-url-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  /* Actions */
+  .editprofile-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ep-save-btn,
+  .ep-cancel-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+  .editprofile-box {
+    padding: 20px 14px;
+  }
+
+  .editprofile-title {
+    font-size: 22px;
+  }
+
+  .ep-img-grid {
+    gap: 6px;
+  }
+
+  .ep-img-item {
+    height: 60px;
+  }
+
+  .ep-save-btn,
+  .ep-cancel-btn {
+    font-size: 13px;
+    padding: 12px;
+  }
+}

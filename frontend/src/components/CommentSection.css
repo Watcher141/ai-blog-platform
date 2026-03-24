@@ -259,3 +259,128 @@
 .login-prompt-close:hover {
   color: var(--text-secondary);
 }
+/* =========================
+   RESPONSIVE FIX (COMMENTS)
+   ========================= */
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .comments-title {
+    font-size: 20px;
+  }
+
+  .comment-avatar {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .comments-section {
+    margin-top: 36px;
+    padding-top: 28px;
+  }
+
+  .comments-title {
+    font-size: 18px;
+  }
+
+  .comment-input {
+    font-size: 13px;
+    padding: 12px 14px;
+  }
+
+  /* Make submit button full width */
+  .comment-submit {
+    align-self: stretch;
+    width: 100%;
+    text-align: center;
+  }
+
+  /* Comment layout tightening */
+  .comment-item {
+    gap: 10px;
+  }
+
+  .comment-avatar {
+    width: 30px;
+    height: 30px;
+    font-size: 10px;
+  }
+
+  .comment-header {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .comment-author {
+    font-size: 12px;
+  }
+
+  .comment-date {
+    font-size: 10px;
+  }
+
+  .comment-delete {
+    font-size: 14px;
+  }
+
+  .comment-text {
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  /* Login modal */
+  .login-prompt-overlay {
+    padding: 16px;
+  }
+
+  .login-prompt {
+    padding: 24px 20px;
+    max-width: 100%;
+    border-radius: var(--radius-lg);
+  }
+
+  .login-prompt h3 {
+    font-size: 20px;
+  }
+
+  .login-prompt p {
+    font-size: 13px;
+  }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+  .comments-title {
+    font-size: 16px;
+  }
+
+  .comment-avatar {
+    width: 26px;
+    height: 26px;
+    font-size: 9px;
+  }
+
+  .comment-text {
+    font-size: 12.5px;
+  }
+
+  .comment-submit {
+    font-size: 12px;
+    padding: 10px;
+  }
+
+  .login-prompt {
+    padding: 20px 16px;
+  }
+
+  .login-prompt h3 {
+    font-size: 18px;
+  }
+
+  .login-prompt p {
+    font-size: 12px;
+  }
+}

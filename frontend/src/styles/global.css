@@ -177,3 +177,69 @@ input:focus {
     transform: rotate(360deg);
   }
 }
+/* =========================
+   RESPONSIVENESS (ADD ONLY)
+   ========================= */
+
+/* Tablets */
+@media (max-width: 1024px) {
+  .container {
+    max-width: 900px;
+    padding: 0 20px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .container {
+    max-width: 100%;
+    padding: 0 16px;
+  }
+
+  body::before {
+    width: 400px;
+    height: 400px;
+    top: -150px;
+    right: -150px;
+  }
+
+  body::after {
+    width: 350px;
+    height: 350px;
+    bottom: -120px;
+    left: -120px;
+  }
+
+  button {
+    width: 100%; /* better tap usability */
+    padding: 12px 18px;
+    font-size: 13px;
+  }
+
+  input {
+    font-size: 13px;
+    padding: 12px 14px;
+  }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+  .container {
+    padding: 0 12px;
+  }
+
+  body::before,
+  body::after {
+    display: none; /* prevent overflow + performance */
+  }
+
+  button {
+    font-size: 12px;
+    padding: 10px 14px;
+  }
+
+  input {
+    font-size: 12px;
+    padding: 10px 12px;
+  }
+}

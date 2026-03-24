@@ -208,3 +208,111 @@
   color: var(--text-muted);
   flex-shrink: 0;
 }
+/* =========================
+   RESPONSIVE FIX (SEO PANEL)
+   ========================= */
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .seo-results {
+    padding: 20px;
+  }
+
+  .seo-score-ring {
+    width: 80px;
+    height: 80px;
+  }
+
+  .seo-score-num {
+    font-size: 22px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .seo-results {
+    padding: 16px;
+  }
+
+  /* KEY FIX: stack layout */
+  .seo-top-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .seo-score-box {
+    align-self: center; /* keeps it visually balanced */
+  }
+
+  .seo-score-ring {
+    width: 70px;
+    height: 70px;
+  }
+
+  .seo-score-num {
+    font-size: 20px;
+  }
+
+  .seo-meta-box {
+    width: 100%;
+  }
+
+  .seo-stat {
+    padding-bottom: 8px;
+  }
+
+  .seo-stat-label {
+    font-size: 11px;
+  }
+
+  .seo-stat-value {
+    font-size: 13px;
+  }
+
+  .seo-meta-desc {
+    font-size: 12.5px;
+    padding: 10px 12px;
+  }
+
+  .seo-keyword {
+    font-size: 11px;
+    padding: 3px 10px;
+  }
+
+  .seo-tip {
+    font-size: 12.5px;
+  }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+  .seo-results {
+    padding: 14px;
+  }
+
+  .seo-score-ring {
+    width: 60px;
+    height: 60px;
+  }
+
+  .seo-score-num {
+    font-size: 18px;
+  }
+
+  .seo-results-title {
+    font-size: 10px;
+  }
+
+  .seo-close {
+    font-size: 18px;
+  }
+
+  .seo-meta-desc {
+    font-size: 12px;
+  }
+
+  .seo-tip {
+    font-size: 12px;
+  }
+}

@@ -264,7 +264,7 @@ export default function MyBlogsPage() {
             {blogs.map((blog, i) => (
               <div key={blog.id} style={{ animationDelay: `${i * 0.07}s` }}>
                 <BlogCard blog={blog} />
-                {/* ✅ Delete button for published blogs */}
+                {/* Delete button for published blogs */}
                 <div className="blog-owner-actions">
                   <button
                     className="blog-delete-btn"
@@ -298,7 +298,7 @@ export default function MyBlogsPage() {
                     className="draft-edit-btn"
                     onClick={() => handleEditDraft(draft)}
                   >
-                    ✏️ Edit
+                    Edit--
                   </button>
                   <button
                     className="draft-publish-btn"
@@ -306,7 +306,7 @@ export default function MyBlogsPage() {
                   >
                     Publish →
                   </button>
-                  {/* ✅ Delete button for drafts */}
+                  {/* Delete button for drafts */}
                   <button
                     className="blog-delete-btn"
                     onClick={() => handleDelete(draft.id, true)}

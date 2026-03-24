@@ -123,3 +123,69 @@
   font-size: 11px;
   color: var(--text-muted);
 }
+/* =========================
+   RESPONSIVE FIX (NOTIFICATIONS)
+   ========================= */
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .notif-dropdown {
+    width: 280px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .notif-dropdown {
+    position: fixed; /* 🔥 KEY FIX */
+    top: 64px; /* below navbar */
+    left: 0;
+    right: 0;
+    width: 100%;
+
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+
+    max-height: calc(100vh - 64px);
+  }
+
+  .notif-list {
+    max-height: calc(100vh - 140px);
+  }
+
+  .notif-item {
+    padding: 12px 14px;
+  }
+
+  .notif-message {
+    font-size: 12.5px;
+  }
+
+  .notif-time {
+    font-size: 10px;
+  }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+  .notif-header {
+    padding: 14px 12px 10px;
+  }
+
+  .notif-title {
+    font-size: 12px;
+  }
+
+  .notif-item {
+    gap: 10px;
+  }
+
+  .notif-icon {
+    font-size: 13px;
+  }
+
+  .notif-message {
+    font-size: 12px;
+  }
+}

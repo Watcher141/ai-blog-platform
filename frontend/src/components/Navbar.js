@@ -14,6 +14,9 @@ export default function Navbar() {
   const user = useSelector((state) => state.auth.user);
   const [profile, setProfile] = useState(null);
 
+  // ✅ NEW: mobile menu state
+  const [menuOpen, setMenuOpen] = useState(false);
+
   useEffect(() => {
     if (!user) {
       setProfile(null);
@@ -35,6 +38,7 @@ export default function Navbar() {
     await logoutUser();
     dispatch(logout());
     navigate("/");
+    setMenuOpen(false); // ✅ close menu after logout
   };
 
   const initials = user?.email ? user.email.slice(0, 2).toUpperCase() : "?";
@@ -43,29 +47,66 @@ export default function Navbar() {
   return (
     <div className="navbar">
       <div className="container navbar-container">
-        <span className="navbar-logo" onClick={() => navigate("/")}>
-          <span className="logo-pulse" />
-          BLOG GEN
-        </span>
+        {/* ✅ TOP BAR (logo + hamburger) */}
+        <div className="nav-top">
+          <span
+            className="navbar-logo"
+            onClick={() => {
+              navigate("/");
+              setMenuOpen(false);
+            }}
+          >
+            <span className="logo-pulse" />
+            BLOG GEN
+          </span>
 
-        <div className="nav-links">
-          <Link to="/">Home</Link>
-          {user && <Link to="/my-blogs">My Blogs</Link>}
-          {!user && <Link to="/login">Login</Link>}
-          {!user && <Link to="/register">Register</Link>}
+          {/* ✅ Hamburger */}
+          <div
+            className={`hamburger ${menuOpen ? "active" : ""}`}
+            onClick={() => setMenuOpen(!menuOpen)}
+          >
+            <span />
+            <span />
+            <span />
+          </div>
+        </div>
 
-          {/* ✅ Notification Bell */}
+        {/* ✅ Nav Links */}
+        <div className={`nav-links ${menuOpen ? "open" : ""}`}>
+          <Link to="/" onClick={() => setMenuOpen(false)}>
+            Home
+          </Link>
+
+          {user && (
+            <Link to="/my-blogs" onClick={() => setMenuOpen(false)}>
+              My Blogs
+            </Link>
+          )}
+
+          {!user && (
+            <Link to="/login" onClick={() => setMenuOpen(false)}>
+              Login
+            </Link>
+          )}
+
+          {!user && (
+            <Link to="/register" onClick={() => setMenuOpen(false)}>
+              Register
+            </Link>
+          )}
+
           {user && <NotificationBell />}
 
           {user && (
             <div className="nav-user">
               <div
                 className="nav-avatar-wrap"
-                onClick={() =>
+                onClick={() => {
+                  setMenuOpen(false);
                   profile
                     ? navigate(`/u/${profile.username}`)
-                    : navigate("/profile/edit")
-                }
+                    : navigate("/profile/edit");
+                }}
               >
                 <div className="nav-avatar">
                   {avatarUrl ? (
@@ -82,9 +123,15 @@ export default function Navbar() {
                   {profile ? `@${profile.username}` : user.email?.split("@")[0]}
                 </span>
               </div>
-              <Link to="/profile/edit" className="nav-edit-profile">
+
+              <Link
+                to="/profile/edit"
+                className="nav-edit-profile"
+                onClick={() => setMenuOpen(false)}
+              >
                 Edit Profile
               </Link>
+
               <button className="nav-logout" onClick={handleLogout}>
                 Logout
               </button>

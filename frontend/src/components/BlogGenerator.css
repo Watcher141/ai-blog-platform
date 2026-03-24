@@ -221,3 +221,107 @@
   color: var(--text-secondary);
   border-color: var(--glass-border);
 }
+/* =========================
+   RESPONSIVE FIX (GENERATOR)
+   ========================= */
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .generator-box {
+    padding: 24px 26px;
+  }
+
+  .gen-modal {
+    max-width: 420px;
+    padding: 28px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .generator-wrap {
+    margin: 30px 0 36px;
+  }
+
+  .generator-box {
+    padding: 20px 18px;
+  }
+
+  /* KEY FIX: stack input + button */
+  .generator-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .generator-input {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 13px;
+  }
+
+  .generator-btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 13px;
+  }
+
+  /* Modal */
+  .gen-modal-overlay {
+    padding: 16px;
+  }
+
+  .gen-modal {
+    padding: 24px 20px;
+    max-width: 100%;
+    border-radius: var(--radius-lg);
+  }
+
+  .gen-modal-title {
+    font-size: 18px;
+  }
+
+  .gen-modal-preview {
+    font-size: 12.5px;
+  }
+
+  .gen-modal-btn-primary,
+  .gen-modal-btn-secondary,
+  .gen-modal-btn-ghost {
+    padding: 12px;
+    font-size: 13px;
+  }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+  .generator-box {
+    padding: 16px 14px;
+  }
+
+  .generator-label {
+    font-size: 10px;
+  }
+
+  .generator-input {
+    font-size: 12px;
+    padding: 10px 12px;
+  }
+
+  .generator-btn {
+    font-size: 12px;
+    padding: 10px;
+  }
+
+  .gen-modal {
+    padding: 20px 16px;
+  }
+
+  .gen-modal-title {
+    font-size: 16px;
+  }
+
+  .gen-modal-preview {
+    font-size: 12px;
+  }
+}
