@@ -4,6 +4,7 @@ from typing import List, Optional
 from engine import BlogEngine
 from firebase_auth import get_current_user
 from fastapi.middleware.cors import CORSMiddleware
+import time 
 from crud import (
     get_profile_by_uid, get_profile_by_username,
     create_profile, update_profile, is_username_taken,
@@ -103,6 +104,22 @@ class CoverImageRequest(BaseModel):
 @app.get("/")
 def root():
     return {"message": "AI Blog API running"}
+
+
+
+@app.get("/health")
+def health_check():
+    try:
+        db_engine.connect()
+        db_status = "connected"
+    except Exception:
+        db_status = "error"
+
+    return {
+        "status": "ok" if db_status == "connected" else "degraded",
+        "timestamp": time.time(),
+        "db": db_status
+    }
 
 # ── Blogs ──
 
