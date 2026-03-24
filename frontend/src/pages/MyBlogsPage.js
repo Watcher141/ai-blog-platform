@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { fetchMyBlogs, fetchMyDrafts, publishDraft } from "../api/blogApi";
+import {
+  fetchMyBlogs,
+  fetchMyDrafts,
+  publishDraft,
+  deleteBlog,
+} from "../api/blogApi";
 import BlogCard from "../components/BlogCard";
 import BlogGenerator from "../components/BlogGenerator";
 import BlogEditor from "../components/BlogEditor";
@@ -19,6 +24,7 @@ export default function MyBlogsPage() {
   const [showEditor, setShowEditor] = useState(false);
   const [activeTab, setActiveTab] = useState("published");
   const [editingBlog, setEditingBlog] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
   const { toasts, showToast, removeToast } = useToast();
   const BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
 
@@ -56,6 +62,32 @@ export default function MyBlogsPage() {
     setShowEditor(true);
     setActiveTab("published");
     window.scrollTo({ top: 400, behavior: "smooth" });
+  };
+
+  // ✅ Delete handler
+  const handleDelete = async (blogId, isDraft = false) => {
+    if (
+      !window.confirm(
+        "Are you sure you want to delete this blog? This cannot be undone.",
+      )
+    )
+      return;
+    setDeletingId(blogId);
+    try {
+      const freshToken = await auth.currentUser.getIdToken(true);
+      await deleteBlog(freshToken, blogId);
+      if (isDraft) {
+        setDrafts((prev) => prev.filter((d) => d.id !== blogId));
+      } else {
+        setBlogs((prev) => prev.filter((b) => b.id !== blogId));
+      }
+      showToast("Blog deleted.", "info");
+    } catch (err) {
+      console.error("Delete error:", err);
+      showToast("Failed to delete blog.", "error");
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   const handlePublish = async (title, content, tags) => {
@@ -232,6 +264,16 @@ export default function MyBlogsPage() {
             {blogs.map((blog, i) => (
               <div key={blog.id} style={{ animationDelay: `${i * 0.07}s` }}>
                 <BlogCard blog={blog} />
+                {/* ✅ Delete button for published blogs */}
+                <div className="blog-owner-actions">
+                  <button
+                    className="blog-delete-btn"
+                    onClick={() => handleDelete(blog.id, false)}
+                    disabled={deletingId === blog.id}
+                  >
+                    {deletingId === blog.id ? "Deleting..." : "🗑 Delete"}
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -264,6 +306,14 @@ export default function MyBlogsPage() {
                   >
                     Publish →
                   </button>
+                  {/* ✅ Delete button for drafts */}
+                  <button
+                    className="blog-delete-btn"
+                    onClick={() => handleDelete(draft.id, true)}
+                    disabled={deletingId === draft.id}
+                  >
+                    {deletingId === draft.id ? "Deleting..." : "🗑 Delete"}
+                  </button>
                 </div>
               </div>
             ))}
@@ -271,7 +321,6 @@ export default function MyBlogsPage() {
         )}
       </div>
 
-      {/* ✅ Toast notifications */}
       {toasts.map((toast) => (
         <Toast
           key={toast.id}

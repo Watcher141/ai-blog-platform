@@ -211,3 +211,35 @@
   background: var(--glass-bg-hover);
   color: var(--text-primary);
 }
+.blog-owner-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 4px 12px;
+  margin-top: -8px;
+}
+
+.blog-delete-btn {
+  background: transparent;
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  color: rgba(248, 113, 113, 0.7);
+  padding: 7px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 500;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: var(--transition);
+  transform: none !important;
+}
+
+.blog-delete-btn:hover:not(:disabled) {
+  background: rgba(248, 113, 113, 0.08);
+  border-color: #f87171;
+  color: #f87171;
+  transform: none !important;
+}
+
+.blog-delete-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

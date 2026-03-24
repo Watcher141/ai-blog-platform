@@ -123,3 +123,10 @@ export const updateCoverImage = (token, blogId, coverImage) =>
       headers: { Authorization: `Bearer ${token}` },
     },
   );
+
+// delete blog (author only)
+
+export const deleteBlog = (token, blogId) =>
+  API.delete(`/blogs/${blogId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
