@@ -51,24 +51,13 @@ export default function Navbar() {
     <>
       <div className="navbar">
         <div className="container navbar-container">
-          {/* Logo — standalone, no wrapper div */}
+          {/* Logo */}
           <span className="navbar-logo" onClick={() => handleNav("/")}>
             <span className="logo-pulse" />
             BLOG GEN
           </span>
 
-          {/* Hamburger — button not div */}
-          <button
-            className={`hamburger ${menuOpen ? "active" : ""}`}
-            onClick={() => setMenuOpen(!menuOpen)}
-            aria-label="Toggle menu"
-          >
-            <span />
-            <span />
-            <span />
-          </button>
-
-          {/* ✅ Nav links */}
+          {/* Nav links */}
           <div className={`nav-links ${menuOpen ? "open" : ""}`}>
             <Link to="/" onClick={() => setMenuOpen(false)}>
               Home
@@ -79,11 +68,13 @@ export default function Navbar() {
                 My Blogs
               </Link>
             )}
+
             {!user && (
               <Link to="/login" onClick={() => setMenuOpen(false)}>
                 Login
               </Link>
             )}
+
             {!user && (
               <Link to="/register" onClick={() => setMenuOpen(false)}>
                 Register
@@ -96,19 +87,15 @@ export default function Navbar() {
               <div className="nav-user">
                 <div
                   className="nav-avatar-wrap"
-                  onClick={() => {
+                  onClick={() =>
                     profile
                       ? handleNav(`/u/${profile.username}`)
-                      : handleNav("/profile/edit");
-                  }}
+                      : handleNav("/profile/edit")
+                  }
                 >
                   <div className="nav-avatar">
                     {avatarUrl ? (
-                      <img
-                        src={avatarUrl}
-                        alt={initials}
-                        referrerPolicy="no-referrer"
-                      />
+                      <img src={avatarUrl} alt="avatar" />
                     ) : (
                       <span>{initials}</span>
                     )}
@@ -134,13 +121,24 @@ export default function Navbar() {
               </div>
             )}
           </div>
+
+          {/* PREMIUM Hamburger */}
+          <button
+            className={`hamburger ${menuOpen ? "active" : ""}`}
+            onClick={() => setMenuOpen(!menuOpen)}
+          >
+            <span />
+            <span />
+            <span />
+          </button>
         </div>
       </div>
 
-      {/* ✅ Overlay — closes menu when clicking outside */}
-      {menuOpen && (
-        <div className="nav-overlay open" onClick={() => setMenuOpen(false)} />
-      )}
+      {/* Premium overlay */}
+      <div
+        className={`nav-overlay ${menuOpen ? "open" : ""}`}
+        onClick={() => setMenuOpen(false)}
+      />
     </>
   );
 }
