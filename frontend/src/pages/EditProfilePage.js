@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { auth } from "../firebase/firebase";
@@ -19,6 +19,8 @@ export default function EditProfilePage() {
   const navigate = useNavigate();
   const { toasts, showToast, removeToast } = useToast();
 
+  const urlDebounceRef = useRef(null); // declared inside component, outside JSX
+
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -29,7 +31,7 @@ export default function EditProfilePage() {
   const [bio, setBio] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [urlInput, setUrlInput] = useState("");
-  const [imgError, setImgError] = useState(false); // ✅ track broken image separately
+  const [imgError, setImgError] = useState(false);
   const [usernameStatus, setUsernameStatus] = useState("");
   const [checkingUsername, setCheckingUsername] = useState(false);
 
@@ -66,16 +68,23 @@ export default function EditProfilePage() {
     load();
   }, [user, navigate]);
 
-  // Apply URL immediately as user types — no blur needed
+  // Cleanup debounce on unmount
+  useEffect(() => {
+    return () => clearTimeout(urlDebounceRef.current);
+  }, []);
+
   const handleUrlChange = (e) => {
     const val = e.target.value;
     setUrlInput(val);
-    setImgError(false); // reset error on new input
-    if (val.trim()) {
-      setAvatarUrl(val.trim());
-    } else {
+    setImgError(false);
+    clearTimeout(urlDebounceRef.current);
+    if (!val.trim()) {
       setAvatarUrl("");
+      return;
     }
+    urlDebounceRef.current = setTimeout(() => {
+      setAvatarUrl(val.trim());
+    }, 600);
   };
 
   const handleUsernameChange = async (val) => {
@@ -136,7 +145,6 @@ export default function EditProfilePage() {
         username: username.trim(),
         display_name: displayName.trim() || null,
         bio: bio.trim() || null,
-        // Don't save broken image URLs
         avatar_url: avatarUrl.trim() && !imgError ? avatarUrl.trim() : null,
       };
       if (isNew) {
@@ -182,7 +190,7 @@ export default function EditProfilePage() {
                 <img
                   src={avatarUrl}
                   alt="avatar"
-                  onError={() => setImgError(true)} // ✅ just flag as error, don't clear URL
+                  onError={() => setImgError(true)}
                 />
               ) : (
                 <span>{username?.slice(0, 2).toUpperCase() || "?"}</span>
@@ -196,7 +204,7 @@ export default function EditProfilePage() {
                 {showImgPicker ? "✕ Close" : "✦ Search Photo"}
               </button>
 
-              {/* ✅ URL paste — updates avatar live as you type */}
+              {/* URL paste input */}
               <div className="ep-url-wrap">
                 <input
                   className="ep-input ep-input-sm"
@@ -207,12 +215,13 @@ export default function EditProfilePage() {
                 />
               </div>
 
-              {/* Status indicators */}
               {avatarUrl && !imgError && urlInput && (
                 <span className="ep-url-hint">✓ Preview updated</span>
               )}
               {imgError && urlInput && (
-                <span className="ep-url-error">✕ Invalid image URL</span>
+                <span className="ep-url-error">
+                  ✕ Can't load image — try a direct URL ending in .jpg/.png
+                </span>
               )}
             </div>
           </div>

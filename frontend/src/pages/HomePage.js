@@ -103,7 +103,7 @@ export default function HomePage() {
           </span>
         </div>
 
-        {/* ✅ Search bar */}
+        {/* Search bar */}
         <div className="home-search-wrap">
           <input
             className="home-search-input"
