@@ -13,8 +13,6 @@ export default function Navbar() {
   const navigate = useNavigate();
   const user = useSelector((state) => state.auth.user);
   const [profile, setProfile] = useState(null);
-
-  // ✅ NEW: mobile menu state
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -38,107 +36,111 @@ export default function Navbar() {
     await logoutUser();
     dispatch(logout());
     navigate("/");
-    setMenuOpen(false); // ✅ close menu after logout
+    setMenuOpen(false);
+  };
+
+  const handleNav = (path) => {
+    navigate(path);
+    setMenuOpen(false);
   };
 
   const initials = user?.email ? user.email.slice(0, 2).toUpperCase() : "?";
   const avatarUrl = profile?.avatar_url || user?.photoURL || null;
 
   return (
-    <div className="navbar">
-      <div className="container navbar-container">
-        {/* ✅ TOP BAR (logo + hamburger) */}
-        <div className="nav-top">
-          <span
-            className="navbar-logo"
-            onClick={() => {
-              navigate("/");
-              setMenuOpen(false);
-            }}
-          >
+    <>
+      <div className="navbar">
+        <div className="container navbar-container">
+          {/* Logo — standalone, no wrapper div */}
+          <span className="navbar-logo" onClick={() => handleNav("/")}>
             <span className="logo-pulse" />
             BLOG GEN
           </span>
 
-          {/* ✅ Hamburger */}
-          <div
+          {/* Hamburger — button not div */}
+          <button
             className={`hamburger ${menuOpen ? "active" : ""}`}
             onClick={() => setMenuOpen(!menuOpen)}
+            aria-label="Toggle menu"
           >
             <span />
             <span />
             <span />
+          </button>
+
+          {/* ✅ Nav links */}
+          <div className={`nav-links ${menuOpen ? "open" : ""}`}>
+            <Link to="/" onClick={() => setMenuOpen(false)}>
+              Home
+            </Link>
+
+            {user && (
+              <Link to="/my-blogs" onClick={() => setMenuOpen(false)}>
+                My Blogs
+              </Link>
+            )}
+            {!user && (
+              <Link to="/login" onClick={() => setMenuOpen(false)}>
+                Login
+              </Link>
+            )}
+            {!user && (
+              <Link to="/register" onClick={() => setMenuOpen(false)}>
+                Register
+              </Link>
+            )}
+
+            {user && <NotificationBell />}
+
+            {user && (
+              <div className="nav-user">
+                <div
+                  className="nav-avatar-wrap"
+                  onClick={() => {
+                    profile
+                      ? handleNav(`/u/${profile.username}`)
+                      : handleNav("/profile/edit");
+                  }}
+                >
+                  <div className="nav-avatar">
+                    {avatarUrl ? (
+                      <img
+                        src={avatarUrl}
+                        alt={initials}
+                        referrerPolicy="no-referrer"
+                      />
+                    ) : (
+                      <span>{initials}</span>
+                    )}
+                  </div>
+                  <span className="nav-username">
+                    {profile
+                      ? `@${profile.username}`
+                      : user.email?.split("@")[0]}
+                  </span>
+                </div>
+
+                <Link
+                  to="/profile/edit"
+                  className="nav-edit-profile"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Edit Profile
+                </Link>
+
+                <button className="nav-logout" onClick={handleLogout}>
+                  Logout
+                </button>
+              </div>
+            )}
           </div>
         </div>
-
-        {/* ✅ Nav Links */}
-        <div className={`nav-links ${menuOpen ? "open" : ""}`}>
-          <Link to="/" onClick={() => setMenuOpen(false)}>
-            Home
-          </Link>
-
-          {user && (
-            <Link to="/my-blogs" onClick={() => setMenuOpen(false)}>
-              My Blogs
-            </Link>
-          )}
-
-          {!user && (
-            <Link to="/login" onClick={() => setMenuOpen(false)}>
-              Login
-            </Link>
-          )}
-
-          {!user && (
-            <Link to="/register" onClick={() => setMenuOpen(false)}>
-              Register
-            </Link>
-          )}
-
-          {user && <NotificationBell />}
-
-          {user && (
-            <div className="nav-user">
-              <div
-                className="nav-avatar-wrap"
-                onClick={() => {
-                  setMenuOpen(false);
-                  profile
-                    ? navigate(`/u/${profile.username}`)
-                    : navigate("/profile/edit");
-                }}
-              >
-                <div className="nav-avatar">
-                  {avatarUrl ? (
-                    <img
-                      src={avatarUrl}
-                      alt={initials}
-                      referrerPolicy="no-referrer"
-                    />
-                  ) : (
-                    <span>{initials}</span>
-                  )}
-                </div>
-                <span className="nav-username">
-                  {profile ? `@${profile.username}` : user.email?.split("@")[0]}
-                </span>
-              </div>
-
-              <Link
-                to="/profile/edit"
-                className="nav-edit-profile"
-                onClick={() => setMenuOpen(false)}
-              >
-                Edit Profile
-              </Link>
-
-              <button className="nav-logout" onClick={handleLogout}>
-                Logout
-              </button>
-            </div>
-          )}
-        </div>
       </div>
-    </div>
+
+      {/* ✅ Overlay — closes menu when clicking outside */}
+      {menuOpen && (
+        <div className="nav-overlay open" onClick={() => setMenuOpen(false)} />
+      )}
+    </>
   );
 }

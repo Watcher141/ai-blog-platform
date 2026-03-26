@@ -21,15 +21,8 @@
 }
 
 /* =========================
-   TOP (LOGO + BURGER)
+   LOGO
    ========================= */
-
-.nav-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-}
 
 .navbar-logo {
   font-family: var(--font-display);
@@ -41,6 +34,8 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0; /* never shrink logo */
+  z-index: 101;
 }
 
 .logo-pulse {
@@ -79,6 +74,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
+  flex-wrap: nowrap; /* never wrap */
 }
 
 .nav-links a {
@@ -87,10 +83,11 @@
   letter-spacing: 0.4px;
   color: var(--text-secondary);
   text-decoration: none;
-  padding: 8px 15px;
+  padding: 8px 12px; /* slightly reduced padding */
   border-radius: var(--radius-sm);
   border: 1px solid transparent;
   transition: var(--transition);
+  white-space: nowrap; /* no text wrapping */
 }
 
 .nav-links a:hover {
@@ -100,25 +97,30 @@
 }
 
 /* =========================
-   USER
+   USER PILL (DESKTOP)
    ========================= */
 
 .nav-user {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px; /* ✅ tighter gap */
   padding: 4px;
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
   border-radius: 999px;
+  flex-shrink: 0;
 }
 
 .nav-avatar-wrap {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   cursor: pointer;
-  padding: 0 6px 0 2px;
+  padding: 0 4px 0 2px;
+  transition: var(--transition);
+}
+.nav-avatar-wrap:hover {
+  opacity: 0.8;
 }
 
 .nav-avatar {
@@ -132,8 +134,9 @@
   justify-content: center;
   font-size: 10px;
   font-weight: 700;
+  color: var(--text-primary);
+  flex-shrink: 0;
 }
-
 .nav-avatar img {
   width: 100%;
   height: 100%;
@@ -143,7 +146,7 @@
 .nav-username {
   font-size: 12px;
   color: var(--text-secondary);
-  max-width: 100px;
+  max-width: 80px; /* reduced */
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -151,19 +154,33 @@
 
 .nav-edit-profile {
   font-size: 12px;
-  padding: 6px 10px;
+  padding: 6px 8px; /* tighter */
   color: var(--text-muted);
   text-decoration: none;
+  white-space: nowrap;
+  transition: var(--transition);
+}
+.nav-edit-profile:hover {
+  color: var(--text-secondary);
 }
 
 .nav-logout {
-  font-size: 13px;
+  font-family: var(--font-sans);
+  font-size: 12px; /* slightly smaller */
   color: var(--text-secondary);
   background: transparent;
   border: 1px solid var(--glass-border);
-  padding: 8px 15px;
+  padding: 7px 12px; /* tighter */
   border-radius: var(--radius-sm);
   cursor: pointer;
+  white-space: nowrap;
+  transition: var(--transition);
+  transform: none !important;
+}
+.nav-logout:hover {
+  color: var(--text-primary);
+  background: var(--glass-bg);
+  transform: none !important;
 }
 
 /* =========================
@@ -173,21 +190,30 @@
 .hamburger {
   display: none;
   flex-direction: column;
-  gap: 4px;
+  gap: 5px;
   cursor: pointer;
   z-index: 200;
+  background: none;
+  border: none;
+  padding: 8px;
+  transform: none !important;
+}
+.hamburger:hover {
+  opacity: 0.7;
+  transform: none !important;
 }
 
 .hamburger span {
+  display: block;
   width: 22px;
   height: 2px;
   background: var(--text-primary);
+  border-radius: 2px;
   transition: var(--transition);
 }
 
-/* animation */
 .hamburger.active span:nth-child(1) {
-  transform: rotate(45deg) translate(4px, 4px);
+  transform: rotate(45deg) translate(5px, 5px);
 }
 .hamburger.active span:nth-child(2) {
   opacity: 0;
@@ -197,53 +223,100 @@
 }
 
 /* =========================
+   OVERLAY
+   ========================= */
+
+.nav-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 99;
+}
+.nav-overlay.open {
+  display: block;
+}
+
+/* =========================
    MOBILE
    ========================= */
 
 @media (max-width: 768px) {
   .hamburger {
-    display: flex !important;
-  }
-
-  /* hide desktop nav */
-  .nav-links {
-    display: none;
-  }
-
-  /* dropdown */
-  .nav-links.open {
     display: flex;
-    position: absolute;
-    top: 64px;
-    left: 0;
-    width: 100%;
+  }
 
+  /* ✅ Slide in from right as a drawer */
+  .nav-links {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 75%;
+    max-width: 280px;
+    height: 100vh;
     flex-direction: column;
-    gap: 14px;
+    align-items: flex-start;
+    gap: 4px;
+    background: rgba(8, 8, 8, 0.98);
+    backdrop-filter: blur(20px);
+    border-left: 1px solid var(--glass-border);
+    padding: 80px 20px 40px;
+    z-index: 100;
+    transition: right 0.3s ease;
+    overflow-y: auto;
+  }
 
-    background: rgba(10, 10, 10, 0.95);
-    backdrop-filter: blur(16px);
-
-    padding: 20px;
-    border-top: 1px solid var(--glass-border);
-
-    animation: fadeDown 0.25s ease;
+  .nav-links.open {
+    right: 0;
   }
 
   .nav-links a {
     width: 100%;
+    font-size: 15px;
+    padding: 12px 16px;
+    border-radius: var(--radius-md);
   }
 
+  /*  Notification bell — full width row */
+  .nav-links > .notif-wrap {
+    width: 100%;
+    padding: 4px 0;
+  }
+
+  /*  User pill — stack vertically, full width */
   .nav-user {
     flex-direction: column;
+    align-items: stretch;
+    border-radius: var(--radius-lg);
+    padding: 12px;
     width: 100%;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .nav-avatar-wrap {
+    padding: 4px 0;
     gap: 10px;
   }
 
-  .nav-edit-profile,
+  .nav-username {
+    max-width: 200px;
+    font-size: 13px;
+  }
+
+  .nav-edit-profile {
+    width: 100%;
+    padding: 10px 0;
+    font-size: 13px;
+    border-top: 1px solid var(--glass-border);
+  }
+
   .nav-logout {
     width: 100%;
+    padding: 10px 16px;
+    font-size: 13px;
     text-align: center;
+    border-radius: var(--radius-md);
   }
 }
 
