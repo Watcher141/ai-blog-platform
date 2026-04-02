@@ -4,6 +4,7 @@ import BlogCard from "../components/BlogCard";
 import BlogGenerator from "../components/BlogGenerator";
 import Orb from "../components/Orb";
 import { useSelector } from "react-redux";
+import Footer from "../components/Footer"; // adjust path
 import "./HomePage.css";
 
 export default function HomePage() {
@@ -142,6 +143,7 @@ export default function HomePage() {
           ))}
         </div>
       </div>
+      <Footer />
     </div>
   );
 }
