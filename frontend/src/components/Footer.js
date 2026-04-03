@@ -18,10 +18,8 @@ export default function Footer() {
         <div className={styles.links}>
           <div>
             <h4>Product</h4>
-            {/* <a href="#features">Features</a>
-            <a href="#how">How it works</a> */}
             <a
-              href="http://localhost:8000/docs"
+              href="https://ai-blog-platform-eqwv.onrender.com/docs"
               target="_blank"
               rel="noreferrer"
             >
@@ -31,9 +29,7 @@ export default function Footer() {
 
           <div>
             <h4>Resources</h4>
-            <a href="#">Blog</a>
-            {/* <a href="#">Examples</a>
-            <a href="#">Changelog</a> */}
+            <a href="/blog">Blog</a>
           </div>
 
           <div>
@@ -45,7 +41,13 @@ export default function Footer() {
             >
               Support Dev ^-^
             </a>
-            <a href="#">Contact</a>
+            <a
+              href="https://wa.me/919836771886"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Contact
+            </a>
           </div>
         </div>
 
