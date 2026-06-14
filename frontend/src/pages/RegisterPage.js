@@ -38,28 +38,9 @@ export default function RegisterPage() {
     if (e.key === "Enter") handleRegister();
   };
 
-  // Show verification sent message
+  // Redirect to login after successful registration
   if (done) {
-    return (
-      <div className="auth-page">
-        <div className="auth-box">
-          <div className="auth-logo">
-            <span className="auth-logo-dot" /> AI Blog
-          </div>
-          <h1 className="auth-title">Check your email.</h1>
-          <p className="auth-subtitle" style={{ marginBottom: 24 }}>
-            We sent a verification link to <strong>{email}</strong>. Please
-            verify your email before logging in.
-          </p>
-          <button
-            className="auth-btn-primary"
-            onClick={() => navigate("/login")}
-          >
-            Go to Login →
-          </button>
-        </div>
-      </div>
-    );
+    navigate("/login");
   }
 
   return (
