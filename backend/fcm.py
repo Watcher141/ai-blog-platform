@@ -19,7 +19,10 @@ if FIREBASE_SERVICE_ACCOUNT_PATH or FIREBASE_SERVICE_ACCOUNT_JSON:
             else:
                 cred_dict = json.loads(FIREBASE_SERVICE_ACCOUNT_JSON)
                 cred = credentials.Certificate(cred_dict)
-            _firebase_app = firebase_admin.initialize_app(cred)
+            try:
+                _firebase_app = firebase_admin.initialize_app(cred)
+            except ValueError:
+                _firebase_app = firebase_admin.get_app()
         _fcm_available = True
         logger.info("FCM initialized")
     except Exception as e:

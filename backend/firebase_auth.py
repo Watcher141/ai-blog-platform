@@ -18,7 +18,10 @@ FIREBASE_SERVICE_ACCOUNT_JSON = os.environ.get("FIREBASE_SERVICE_ACCOUNT_JSON", 
 if FIREBASE_SERVICE_ACCOUNT_PATH and os.path.exists(FIREBASE_SERVICE_ACCOUNT_PATH):
     try:
         cred = credentials.Certificate(FIREBASE_SERVICE_ACCOUNT_PATH)
-        _firebase_app = firebase_admin.initialize_app(cred)
+        try:
+            _firebase_app = firebase_admin.get_app()
+        except ValueError:
+            _firebase_app = firebase_admin.initialize_app(cred)
         _firebase_available = True
         print("[Firebase] Admin SDK initialized via file")
     except Exception as e:
@@ -27,7 +30,10 @@ elif FIREBASE_SERVICE_ACCOUNT_JSON:
     try:
         cred_dict = json.loads(FIREBASE_SERVICE_ACCOUNT_JSON)
         cred = credentials.Certificate(cred_dict)
-        _firebase_app = firebase_admin.initialize_app(cred)
+        try:
+            _firebase_app = firebase_admin.get_app()
+        except ValueError:
+            _firebase_app = firebase_admin.initialize_app(cred)
         _firebase_available = True
         print("[Firebase] Admin SDK initialized via env var")
     except Exception as e:

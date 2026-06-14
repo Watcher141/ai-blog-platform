@@ -1,250 +1,210 @@
-# 🤖 AI Blog Platform
+# AI Blog Platform
 
-A full-stack AI-powered blog platform built with **React** (frontend) and **FastAPI** (backend), featuring a rich code editor, 3D UI elements, Firebase integration, and AI-generated content powered by **Groq**.
-
----
-
-## 🧱 Tech Stack
-
-### Frontend
-
-- **React 19** with Redux Toolkit for state management
-- **React Router v7** for navigation
-- **CodeMirror 6** – Markdown code editor
-- **Three.js / React Three Fiber / Postprocessing** – 3D visuals
-- **Firebase** – Auth & Firestore database
-- **Axios** – HTTP client
-- **React Markdown** – Render blog content
-
-### Backend
-
-- **FastAPI** (Python)
-- **Groq API** – LLM for AI blog generation (`GROQ_API_KEY`)
+An AI-powered blogging platform where users generate, write, edit, and share blogs with AI assistance — featuring dual auth (self-hosted JWT + Firebase), multi-level caching, rate limiting, and push notifications.
 
 ---
 
-## 📁 Project Structure
+## Features
 
-```bash
+### Blogging
+- **AI Blog Generation** — Generate full blog posts from a topic via Groq LLM + RAG (web search context)
+- **Manual Blog Editor** — Markdown editor (CodeMirror 6) with toolbar, AI sentence suggestions, tag management
+- **Blog Management** — Publish drafts, edit, delete, set cover images
+- **Search** — Search blogs by title, content, or tags with pagination
+- **Load More** — Paginated blog feed with "Load More" button
+
+### Social
+- **User Profiles** — Custom username, display name, bio, avatar URL
+- **Follow System** — Follow/unfollow users with notifications
+- **Likes** — Like/unlike blogs with real-time count updates
+- **Comments** — Comment on blogs with delete capability
+
+### AI-Powered Tools
+- **AI Suggestions** — Next-sentence suggestions while typing (Tab to accept)
+- **SEO Analysis** — Score, meta description, keywords, readability, improvement tips
+- **Blog Summarization** — AI-generated TLDR summarization
+- **Auto Tagging** — AI-generated tags from content
+
+### Authentication
+- **Dual Auth** — Self-hosted JWT (default) or Firebase Auth
+- **Registration** — Email/password with server + client validation
+- **Cross-tab Sync** — Login/logout syncs across browser tabs
+- **Token Expiry Detection** — Auto-logout on expired JWT
+
+### Notifications
+- **In-app Notifications** — Bell icon with dropdown for likes, comments, follows, new blogs
+- **FCM Push Notifications** — Optional Firebase Cloud Messaging for mobile push
+- **Auto-mark Read** — Notifications auto-mark as read on dropdown open
+
+### Performance & Reliability
+- **Multi-level Caching** — In-memory → Redis → Firestore → Database
+- **Cache Invalidation** — Automatic cache busting on create/update/delete
+- **Rate Limiting** — Auth (5/min), blog generation (30/min), upload (10/min)
+
+### Security
+- **Input Validation** — Email, password strength, username, title, content, upload MIME type + size
+- **JWT Hardening** — jti claim, iat claim, configurable expiry, no default secret
+- **Upload Safety** — MIME validation, max 5MB, path traversal prevention
+- **Error Handling** — Global exception handlers, structured logging with request IDs
+- **Axios Interceptors** — Auto-redirect to login on 401, error logging for 429/500+
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| **Backend** | Python 3.11, FastAPI, Uvicorn |
+| **Frontend** | React 19, Redux Toolkit, React Router 7 |
+| **Database** | SQLite (dev) / PostgreSQL (prod) via SQLAlchemy |
+| **AI / LLM** | Groq API (llama-3.1-8b / llama-3.3-70b) |
+| **Cache** | In-memory + Redis + optional Firestore |
+| **Auth** | Self-hosted JWT (python-jose) or Firebase Auth |
+| **Push** | Firebase Cloud Messaging (optional) |
+| **Markdown** | CodeMirror 6 |
+| **3D Graphics** | OGL (WebGL orb animation) |
+
+---
+
+## Project Structure
+
+```
 ai-blog-platform/
-│
-├── backend/                      # FastAPI backend
-│   ├── __pycache__/
-│   ├── venv/                     # Virtual environment
-│   ├── .env                      # Environment variables (Groq API key)
-│   ├── .prettierrc
-│   ├── blogs.db                  # SQLite database
-│   ├── cache.py                  # Caching layer for faster responses
-│   ├── crud.py                   # Database CRUD operations
-│   ├── database.py               # Database connection setup
-│   ├── engine.py                 # Core LLM interaction (Groq API)
-│   ├── firebase_auth.py          # Firebase authentication logic
-│   ├── firebase_service_account.json  # Firebase credentials
-│   ├── init_db.py                # Database initialization script
-│   ├── main.py                   # FastAPI entry point
-│   ├── models.py                 # Database models/schema
-│   ├── Procfile                  # Deployment config (Heroku/Render)
-│   ├── rag.py                    # Retrieval-Augmented Generation (RAG)
-│   ├── structured_blog_chain.py  # Blog generation pipeline
-│   ├── requirements.txt          # Python dependencies
-│   └── runtime.txt               # Python runtime version
-│
-├── frontend/                     # React frontend
-│   ├── node_modules/
-│   ├── public/
-│   ├── src/                      # Main React source code
-│   ├── .env                      # Firebase configuration
-│   ├── .env.production
-│   ├── .gitignore
-│   ├── package.json
-│   ├── package-lock.json
-│   └── README.md
-│
-├── .gitattributes
-├── .gitignore
-└── README.md                     # Root project documentation
+├── backend/
+│   ├── main.py                  # FastAPI app + all routes
+│   ├── models.py                # SQLAlchemy ORM models
+│   ├── database.py              # DB engine + session
+│   ├── crud.py                  # CRUD operations
+│   ├── auth.py                  # JWT + password hashing
+│   ├── firebase_auth.py         # Firebase dual auth
+│   ├── engine.py                # BlogEngine (Groq LLM)
+│   ├── structured_blog_chain.py # AI blog generation pipeline
+│   ├── rag.py                   # Web search + RAG context
+│   ├── cache.py                 # Multi-level cache
+│   ├── firestore_cache.py       # Firestore cache tier
+│   ├── fcm.py                   # Push notifications
+│   ├── validators.py            # Input validation
+│   ├── ratelimit.py             # Rate limiter
+│   ├── logger.py                # Structured logging
+│   └── .env                     # Environment variables
+├── frontend/
+│   └── src/
+│       ├── App.js               # Root with routing
+│       ├── pages/               # Route pages
+│       ├── components/          # Reusable components
+│       ├── api/blogApi.js       # Axios API client
+│       ├── services/auth.js     # Auth service
+│       ├── features/            # Redux slices
+│       ├── firebase/            # Firebase client SDK
+│       ├── context/             # React contexts
+│       └── hooks/               # Custom hooks
+├── PROGRESS.md                  # Development tracker
+└── README.md
 ```
 
 ---
 
-## 🧠 Key Highlights
+## Getting Started
 
-- **RAG Pipeline (`rag.py`)**  
-  Enhances blog generation by retrieving relevant web/context data before passing it to the LLM.
+### Prerequisites
 
-- **Structured Generation (`structured_blog_chain.py`)**  
-  Ensures blogs are generated in a clean, section-wise format instead of raw text.
+- Python 3.11
+- Node.js 18+
+- Groq API key ([console.groq.com](https://console.groq.com))
 
-- **LLM Engine (`engine.py`)**  
-  Handles interaction with the Groq API for fast AI content generation.
-
-- **Database Layer (`models.py`, `crud.py`, `database.py`)**  
-  Manages blog storage and retrieval using SQLite.
-
-- **Authentication (`firebase_auth.py`)**  
-  Secure user authentication via Firebase.
-
-## ⚙️ Prerequisites
-
-Make sure you have the following installed:
-
-- [Node.js](https://nodejs.org/) v18+
-- [Python](https://www.python.org/) 3.10+
-- [pip](https://pip.pypa.io/)
-- A [Groq API key](https://console.groq.com/)
-- A [Firebase project](https://console.firebase.google.com/)
-
----
-
-## 🚀 Getting Started
-
-### 1. Clone the Repository
-
-```bash
-git clone https://github.com/Watcher141/ai-blog-platform.git
-cd ai-blog-platform
-```
-
----
-
-### 2. Backend Setup (FastAPI)
+### Backend Setup
 
 ```bash
 cd backend
-```
-
-#### Create and activate a virtual environment
-
-```bash
-# macOS/Linux
-python3 -m venv venv
-source venv/bin/activate
-
-# Windows
 python -m venv venv
-venv\Scripts\activate
-```
-
-#### Install dependencies
-
-```bash
+venv\Scripts\activate      # Windows
 pip install -r requirements.txt
+
+# Create .env with your keys:
+# GROQ_API_KEY=gsk_...
+# JWT_SECRET_KEY=<random-64-char-string>
+
+uvicorn main:app --host 0.0.0.0 --port 8000
 ```
 
-#### Set up environment variables
-
-Create a `.env` file inside the `backend/` folder:
-
-```env
-GROQ_API_KEY=your_groq_api_key_here
-```
-
-#### Run the backend server
-
-```bash
-uvicorn main:app --reload
-```
-
-The API will be available at: `http://localhost:8000`
-
-> **API Docs:** Visit `http://localhost:8000/docs` for the auto-generated Swagger UI.
-
----
-
-### 3. Frontend Setup (React)
+### Frontend Setup
 
 ```bash
 cd frontend
-```
-
-#### Install dependencies
-
-```bash
 npm install
-```
 
-#### Set up Firebase
+# Create .env:
+# REACT_APP_API_URL=http://127.0.0.1:8000
 
-1. Go to your [Firebase Console](https://console.firebase.google.com/)
-2. Create a new project (or use an existing one)
-3. Enable **Authentication** and **Firestore**
-4. Copy your Firebase config
-
-Create a `.env` file inside the `frontend/` folder:
-
-```env
-REACT_APP_FIREBASE_API_KEY=your_firebase_api_key
-REACT_APP_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
-REACT_APP_FIREBASE_PROJECT_ID=your_project_id
-REACT_APP_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
-REACT_APP_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-REACT_APP_FIREBASE_APP_ID=your_app_id
-```
-
-#### Configure the backend URL (optional)
-
-If your backend runs on a port other than `8000`, update the Axios base URL in your source code accordingly.
-
-#### Start the development server
-
-```bash
 npm start
 ```
 
-The app will open at: `http://localhost:3000`
+Open `http://localhost:3000`.
 
 ---
 
-## 🔑 Environment Variables Summary
+## Environment Variables
 
-### Backend (`backend/.env`)
+### Backend
 
-| Variable       | Description                  |
-| -------------- | ---------------------------- |
-| `GROQ_API_KEY` | Your API key from Groq Cloud |
+| Variable | Required | Default | Notes |
+|---|---|---|---|
+| `GROQ_API_KEY` | **Yes** | — | Groq Cloud API key |
+| `JWT_SECRET_KEY` | **Yes** | — | 64+ char random string |
+| `DATABASE_URL` | No | `sqlite:///./blogs.db` | PostgreSQL in production |
+| `REDIS_URL` | No | `redis://localhost:6379` | Falls back to in-memory |
+| `FIREBASE_SERVICE_ACCOUNT_PATH` | No | — | Path to Firebase admin JSON |
+| `FIREBASE_SERVICE_ACCOUNT_JSON` | No | — | Inline Firebase admin JSON |
+| `JWT_ALGORITHM` | No | `HS256` | |
+| `JWT_EXPIRATION_HOURS` | No | `72` | |
 
-### Frontend (`frontend/.env`)
+### Frontend
 
-| Variable                                 | Description                  |
-| ---------------------------------------- | ---------------------------- |
-| `REACT_APP_FIREBASE_API_KEY`             | Firebase API Key             |
-| `REACT_APP_FIREBASE_AUTH_DOMAIN`         | Firebase Auth Domain         |
-| `REACT_APP_FIREBASE_PROJECT_ID`          | Firebase Project ID          |
-| `REACT_APP_FIREBASE_STORAGE_BUCKET`      | Firebase Storage Bucket      |
-| `REACT_APP_FIREBASE_MESSAGING_SENDER_ID` | Firebase Messaging Sender ID |
-| `REACT_APP_FIREBASE_APP_ID`              | Firebase App ID              |
-
----
-
-## 📦 Available Scripts (Frontend)
-
-Inside the `frontend/` directory:
-
-| Command         | Description                        |
-| --------------- | ---------------------------------- |
-| `npm start`     | Start the development server       |
-| `npm run build` | Build the app for production       |
-| `npm test`      | Run tests                          |
-| `npm run eject` | Eject from Create React App config |
+| Variable | Required | Default | Notes |
+|---|---|---|---|
+| `REACT_APP_API_URL` | No | `http://127.0.0.1:8000` | Backend URL |
+| `REACT_APP_FIREBASE_CONFIG` | No | — | JSON string for Firebase SDK |
 
 ---
 
-## 🛠️ Common Issues
+## Deployment
 
-**`Module not found` errors on npm install**
-→ Delete `node_modules/` and `package-lock.json`, then run `npm install` again.
+### Backend (Render / Heroku)
+Uses `Procfile` and `runtime.txt`. Set environment variables in your hosting dashboard.
 
-**Backend not connecting to frontend**
-→ Make sure CORS is enabled in your FastAPI app and both servers are running.
-
-**Groq API errors**
-→ Double-check your `GROQ_API_KEY` is valid and has not exceeded its rate limit.
-
-**Firebase permission errors**
-→ Check your Firestore security rules in the Firebase Console.
+### Frontend (Vercel)
+```bash
+cd frontend
+npm run build
+```
+Deploy the `build/` directory. CORS origins are preconfigured for Vercel deployments.
 
 ---
 
-## 📄 License
+## Limitations & Warnings
 
-This project is open-source. See the [LICENSE](LICENSE) file for details.
+### Things the website **cannot** do (yet)
+- **No blog content update endpoint** — blogs cannot be edited after creation (except cover image). Delete + recreate.
+- **No social login** — Google/Facebook login buttons are placeholders; only email/password works out-of-the-box.
+- **No password reset** — no "forgot password" flow.
+- **No admin panel** — no moderation tools, no user management UI.
+- **No pagination on profile blogs** — public profile blog list uses the backend's pagination params but the frontend loads all at once.
+- **No unsplash/stock image integration** — cover images must be pasted as URLs.
+- **No automated tests** — no backend test suite (unit/integration).
+
+### Known issues & cautions
+- **bcrypt < 5.0 pinned** — `passlib[bcrypt]` is incompatible with bcrypt 5.x. If bcrypt upgrades, password verification breaks.
+- **SQLite not for production** — defaults to SQLite. Use PostgreSQL (`DATABASE_URL`) for any real deployment. SQLite doesn't handle concurrent writes.
+- **Redis optional, but...** — without Redis, cache is in-memory only (per-process, lost on restart). With multiple server workers, each has its own cache.
+- **Firebase optional, but...** — push notifications, Firestore cache, and Firebase Auth are only active if you provide service account credentials.
+- **Device tokens not persisted** — FCM device tokens are stored in memory and lost on server restart.
+- **Rate limits are per-process** — rate limiter is in-memory; resets on restart and doesn't share across workers.
+- **Delete endpoint lacks auth** — `DELETE /blogs/{blog_id}` does not verify the caller owns the blog (anyone can delete any blog).
+- **CORS origins hardcoded** — frontend domains must be added to `main.py` for cross-origin requests.
+- **No rate limiting on general endpoints** — only auth, generate, and upload are throttled.
+
+---
+
+## License
+
+MIT
