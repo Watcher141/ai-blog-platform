@@ -1,11 +1,8 @@
 import "./BlogCard.css";
 import { Link } from "react-router-dom";
-import { useEffect, useState } from "react";
-
-const UNSPLASH_KEY = process.env.REACT_APP_UNSPLASH_ACCESS_KEY;
 
 export default function BlogCard({ blog }) {
-  const [coverImage, setCoverImage] = useState(null);
+  const coverImage = blog.cover_image || null;
 
   const preview = blog.content
     ? blog.content.slice(0, 120) + "..."
@@ -15,38 +12,16 @@ export default function BlogCard({ blog }) {
     ? blog.tags
     : (blog.tags || "").split(",");
 
-  const searchQuery = blog.title || tagsArray[0] || "writing";
-
-  useEffect(() => {
-    //Use saved cover image if exists — don't fetch from Unsplash
-    if (blog.cover_image) {
-      setCoverImage(blog.cover_image);
-      return;
-    }
-
-    if (!UNSPLASH_KEY) return;
-    const fetchImage = async () => {
-      try {
-        const res = await fetch(
-          `https://api.unsplash.com/search/photos?query=${encodeURIComponent(searchQuery)}&per_page=1&orientation=landscape`,
-          { headers: { Authorization: `Client-ID ${UNSPLASH_KEY}` } },
-        );
-        const data = await res.json();
-        if (data.results?.[0]) setCoverImage(data.results[0].urls.regular);
-      } catch (err) {
-        console.error("Image fetch error:", err);
-      }
-    };
-    fetchImage();
-  }, [searchQuery, blog.cover_image]);
-
   return (
     <div className="blog-card">
       <div className="blog-card-image">
         {coverImage ? (
           <img src={coverImage} alt={blog.title} loading="lazy" />
         ) : (
-          <div className="blog-card-image-placeholder">
+          <div
+            className="blog-card-image-placeholder"
+            style={{ background: `linear-gradient(135deg, hsl(${blog.title?.length * 37 % 360}, 50%, 25%), hsl(${(blog.title?.length * 37 + 60) % 360}, 50%, 15%))` }}
+          >
             <span>✦</span>
           </div>
         )}

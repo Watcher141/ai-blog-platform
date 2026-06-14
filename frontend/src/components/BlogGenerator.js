@@ -1,7 +1,7 @@
 import "./BlogGenerator.css";
 import { useState } from "react";
 import { generateBlog } from "../api/blogApi";
-import { auth } from "../firebase/firebase";
+import { getToken } from "../services/auth";
 
 const BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
 
@@ -15,7 +15,7 @@ export default function BlogGenerator({ onEditBlog, onToast }) {
     if (!topic.trim()) return;
     setLoading(true);
     try {
-      const freshToken = await auth.currentUser.getIdToken(true);
+      const freshToken = await getToken();
       const res = await generateBlog(freshToken, topic);
       setGeneratedBlog(res.data);
       setShowModal(true);
@@ -36,7 +36,7 @@ export default function BlogGenerator({ onEditBlog, onToast }) {
 
   const handlePublishNow = async () => {
     try {
-      const freshToken = await auth.currentUser.getIdToken(true);
+      const freshToken = await getToken();
       await fetch(`${BASE_URL}/blogs/${generatedBlog.id}/publish`, {
         method: "POST",
         headers: { Authorization: `Bearer ${freshToken}` },

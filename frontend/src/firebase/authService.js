@@ -1,30 +1,11 @@
-import { auth } from "./firebase";
-import {
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signOut,
-  GoogleAuthProvider,
-  signInWithPopup,
-  sendEmailVerification,
-} from "firebase/auth";
+// Firebase auth replaced with self-hosted JWT auth.
+// All auth functions now live in services/auth.js
+import { registerUser, loginUser, logoutUser, getToken } from "../services/auth";
 
-const provider = new GoogleAuthProvider();
-
-export const registerUser = async (email, password) => {
-  const res = await createUserWithEmailAndPassword(auth, email, password);
-  //Send verification email immediately after register
-  await sendEmailVerification(res.user);
-  return res;
+// Google login removed — was tied to Firebase. Keeping the export so
+// imports don't break; callers should hide/disable the Google button.
+const loginWithGoogle = () => {
+  throw new Error("Google login is not available with the current auth provider.");
 };
 
-export const loginUser = (email, password) =>
-  signInWithEmailAndPassword(auth, email, password);
-
-export const loginWithGoogle = () => signInWithPopup(auth, provider);
-
-export const logoutUser = () => signOut(auth);
-
-export const getToken = async () => {
-  if (!auth.currentUser) return null;
-  return await auth.currentUser.getIdToken();
-};
+export { registerUser, loginUser, loginWithGoogle, logoutUser, getToken };

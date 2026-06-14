@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { auth } from "../firebase/firebase";
+import { getToken } from "../services/auth";
 import { toggleLike, getLikeStatus } from "../api/blogApi";
 import "./LikeButton.css";
 
@@ -15,21 +15,22 @@ export default function LikeButton({ blogId }) {
 
   useEffect(() => {
     if (!user) {
-      // get public count without auth
       setCount(0);
       return;
     }
+    const ac = new AbortController();
     const load = async () => {
       try {
-        const token = await auth.currentUser.getIdToken(true);
-        const res = await getLikeStatus(token, blogId);
+        const token = await getToken();
+        const res = await getLikeStatus(token, blogId, ac.signal);
         setLiked(res.data.liked);
         setCount(res.data.like_count);
       } catch (err) {
-        console.error(err);
+        if (err.name !== "CanceledError") console.error(err);
       }
     };
     load();
+    return () => ac.abort();
   }, [user, blogId]);
 
   const handleLike = async () => {
@@ -39,7 +40,7 @@ export default function LikeButton({ blogId }) {
     }
     setLoading(true);
     try {
-      const token = await auth.currentUser.getIdToken(true);
+      const token = await getToken();
       const res = await toggleLike(token, blogId);
       setLiked(res.data.liked);
       setCount(res.data.like_count);

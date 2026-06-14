@@ -7,38 +7,36 @@ import { setUser, logout } from "./features/authSlice";
 
 import App from "./App";
 
-import { auth } from "./firebase/firebase";
-import { onAuthStateChanged } from "firebase/auth";
+import { verifyToken } from "./services/auth";
 import "./styles/global.css";
 
 function AuthLoader() {
   const dispatch = useDispatch();
-  const [authReady, setAuthReady] = useState(false); // ✅ wait for auth
+  const [authReady, setAuthReady] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        const token = await user.getIdToken(true);
+    const init = async () => {
+      const result = await verifyToken();
+      if (result) {
         dispatch(
           setUser({
             user: {
-              uid: user.uid,
-              email: user.email,
-              displayName: user.displayName,
+              id: result.user.id,
+              uid: result.user.id,
+              email: result.user.email,
+              displayName: result.user.displayName,
             },
-            token,
+            token: result.token,
           }),
         );
       } else {
         dispatch(logout());
       }
-      setAuthReady(true); // ✅ auth state resolved
-    });
-
-    return () => unsubscribe();
+      setAuthReady(true);
+    };
+    init();
   }, [dispatch]);
 
-  // ✅ Don't render app until Firebase has restored session
   if (!authReady) return null;
 
   return <App />;

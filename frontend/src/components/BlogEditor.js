@@ -5,7 +5,7 @@ import { defaultKeymap } from "@codemirror/commands";
 import { markdown } from "@codemirror/lang-markdown";
 import { oneDark } from "@codemirror/theme-one-dark";
 import { getSuggestion } from "../api/blogApi";
-import { auth } from "../firebase/firebase";
+import { getToken } from "../services/auth";
 import "./BlogEditor.css";
 
 //Outside component — no dependency issue
@@ -35,7 +35,7 @@ export default function BlogEditor({
     if (!text.trim() || text.trim().length < 30) return;
     setLoadingTags(true);
     try {
-      const freshToken = await auth.currentUser.getIdToken(true);
+      const freshToken = await getToken();
       const res = await fetch(`${BASE_URL}/suggest-tags`, {
         method: "POST",
         headers: {
@@ -54,17 +54,20 @@ export default function BlogEditor({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const suggestAcRef = useRef(null);
   const fetchSuggestion = useCallback(async (text) => {
     if (!text.trim() || text.trim().length < 20) return;
+    if (suggestAcRef.current) suggestAcRef.current.abort();
     setLoadingSuggest(true);
+    suggestAcRef.current = new AbortController();
     try {
-      const freshToken = await auth.currentUser.getIdToken(true);
-      const res = await getSuggestion(freshToken, text);
+      const freshToken = await getToken();
+      const res = await getSuggestion(freshToken, text, suggestAcRef.current.signal);
       const s = res.data.suggestion;
       setSuggestion(s);
       suggestionRef.current = s;
     } catch (err) {
-      console.error("Suggestion error:", err);
+      if (err.name !== "CanceledError") console.error("Suggestion error:", err);
     } finally {
       setLoadingSuggest(false);
     }

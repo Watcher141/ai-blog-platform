@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { auth } from "../firebase/firebase";
+import { getToken } from "../services/auth";
 import {
   getMyProfile,
   createProfile,
@@ -11,8 +11,6 @@ import {
 import Toast from "../components/Toast";
 import useToast from "../hooks/useToast";
 import "./EditProfilePage.css";
-
-const UNSPLASH_KEY = process.env.REACT_APP_UNSPLASH_ACCESS_KEY;
 
 export default function EditProfilePage() {
   const user = useSelector((state) => state.auth.user);
@@ -35,20 +33,18 @@ export default function EditProfilePage() {
   const [usernameStatus, setUsernameStatus] = useState("");
   const [checkingUsername, setCheckingUsername] = useState(false);
 
-  const [imgQuery, setImgQuery] = useState("");
-  const [imgResults, setImgResults] = useState([]);
-  const [imgLoading, setImgLoading] = useState(false);
-  const [showImgPicker, setShowImgPicker] = useState(false);
+
 
   useEffect(() => {
     if (!user) {
       navigate("/login");
       return;
     }
+    const ac = new AbortController();
     const load = async () => {
       try {
-        const token = await auth.currentUser.getIdToken(true);
-        const res = await getMyProfile(token);
+        const token = await getToken();
+        const res = await getMyProfile(token, ac.signal);
         if (res.data) {
           setProfile(res.data);
           setUsername(res.data.username || "");
@@ -59,13 +55,14 @@ export default function EditProfilePage() {
         } else {
           setIsNew(true);
         }
-      } catch {
-        setIsNew(true);
+      } catch (err) {
+        if (err.name !== "CanceledError") setIsNew(true);
       } finally {
         setLoading(false);
       }
     };
     load();
+    return () => ac.abort();
   }, [user, navigate]);
 
   // Cleanup debounce on unmount
@@ -106,28 +103,7 @@ export default function EditProfilePage() {
     }
   };
 
-  const handleImageSearch = async () => {
-    if (!imgQuery.trim() || !UNSPLASH_KEY) return;
-    setImgLoading(true);
-    try {
-      const res = await fetch(
-        `https://api.unsplash.com/search/photos?query=${encodeURIComponent(imgQuery)}&per_page=6&orientation=squarish`,
-        { headers: { Authorization: `Client-ID ${UNSPLASH_KEY}` } },
-      );
-      const data = await res.json();
-      setImgResults(
-        data.results?.map((img) => ({
-          url: img.urls.small,
-          full: img.urls.regular,
-          author: img.user.name,
-        })) || [],
-      );
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setImgLoading(false);
-    }
-  };
+
 
   const handleSave = async () => {
     if (!username.trim()) {
@@ -140,7 +116,7 @@ export default function EditProfilePage() {
     }
     setSaving(true);
     try {
-      const token = await auth.currentUser.getIdToken(true);
+      const token = await getToken();
       const data = {
         username: username.trim(),
         display_name: displayName.trim() || null,
@@ -197,18 +173,11 @@ export default function EditProfilePage() {
               )}
             </div>
             <div className="editprofile-avatar-actions">
-              <button
-                className="ep-img-btn"
-                onClick={() => setShowImgPicker(!showImgPicker)}
-              >
-                {showImgPicker ? "✕ Close" : "✦ Search Photo"}
-              </button>
-
               {/* URL paste input */}
               <div className="ep-url-wrap">
                 <input
                   className="ep-input ep-input-sm"
-                  placeholder="Or paste image URL..."
+                  placeholder="Paste image URL..."
                   value={urlInput}
                   onChange={handleUrlChange}
                   style={{ marginBottom: 0 }}
@@ -225,44 +194,6 @@ export default function EditProfilePage() {
               )}
             </div>
           </div>
-
-          {/* Image picker */}
-          {showImgPicker && (
-            <div className="ep-img-picker">
-              <div className="ep-img-search">
-                <input
-                  className="ep-input"
-                  placeholder="Search photos..."
-                  value={imgQuery}
-                  onChange={(e) => setImgQuery(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleImageSearch()}
-                />
-                <button
-                  className="ep-search-btn"
-                  onClick={handleImageSearch}
-                  disabled={imgLoading}
-                >
-                  {imgLoading ? "..." : "Search"}
-                </button>
-              </div>
-              <div className="ep-img-grid">
-                {imgResults.map((img, i) => (
-                  <div
-                    key={i}
-                    className="ep-img-item"
-                    onClick={() => {
-                      setAvatarUrl(img.full);
-                      setUrlInput(img.full);
-                      setImgError(false);
-                      setShowImgPicker(false);
-                    }}
-                  >
-                    <img src={img.url} alt={img.author} />
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
 
           {/* Fields */}
           <div className="editprofile-fields">

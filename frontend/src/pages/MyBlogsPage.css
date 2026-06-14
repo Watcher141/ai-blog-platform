@@ -367,3 +367,10 @@
     padding: 8px;
   }
 }
+
+.pagination-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 24px 0;
+  grid-column: 1 / -1;
+}

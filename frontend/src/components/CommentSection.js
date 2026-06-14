@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
-import { auth } from "../firebase/firebase";
+import { getToken } from "../services/auth";
 import { getComments, addComment, deleteComment } from "../api/blogApi";
 import "./CommentSection.css";
 
@@ -15,18 +15,20 @@ export default function CommentSection({ blogId }) {
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
   useEffect(() => {
+    const ac = new AbortController();
     const load = async () => {
       setLoading(true);
       try {
-        const res = await getComments(blogId);
+        const res = await getComments(blogId, ac.signal);
         setComments(res.data);
       } catch (err) {
-        console.error(err);
+        if (err.name !== "CanceledError") console.error(err);
       } finally {
         setLoading(false);
       }
     };
     load();
+    return () => ac.abort();
   }, [blogId]);
 
   const handleSubmit = async () => {
@@ -37,7 +39,7 @@ export default function CommentSection({ blogId }) {
     if (!text.trim()) return;
     setSubmitting(true);
     try {
-      const token = await auth.currentUser.getIdToken(true);
+      const token = await getToken();
       const res = await addComment(token, blogId, text.trim());
       setComments((prev) => [...prev, res.data]);
       setText("");
@@ -50,7 +52,7 @@ export default function CommentSection({ blogId }) {
 
   const handleDelete = async (commentId) => {
     try {
-      const token = await auth.currentUser.getIdToken(true);
+      const token = await getToken();
       await deleteComment(token, commentId);
       setComments((prev) => prev.filter((c) => c.id !== commentId));
     } catch (err) {

@@ -12,14 +12,20 @@ import BlogEditor from "../components/BlogEditor";
 import SEOPanel from "../components/SEOPanel";
 import Toast from "../components/Toast";
 import useToast from "../hooks/useToast";
-import { auth } from "../firebase/firebase";
+import { getToken } from "../services/auth";
 import "./MyBlogsPage.css";
+
+const PAGE_LIMIT = 8;
 
 export default function MyBlogsPage() {
   const user = useSelector((state) => state.auth.user);
   const [blogs, setBlogs] = useState([]);
+  const [blogsTotal, setBlogsTotal] = useState(0);
   const [drafts, setDrafts] = useState([]);
+  const [draftsTotal, setDraftsTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [loadingMorePub, setLoadingMorePub] = useState(false);
+  const [loadingMoreDraft, setLoadingMoreDraft] = useState(false);
   const [editorContent, setEditorContent] = useState("");
   const [showEditor, setShowEditor] = useState(false);
   const [activeTab, setActiveTab] = useState("published");
@@ -30,22 +36,26 @@ export default function MyBlogsPage() {
 
   useEffect(() => {
     if (!user) return;
+    const ac = new AbortController();
     const load = async () => {
       try {
-        const freshToken = await auth.currentUser.getIdToken(true);
+        const freshToken = await getToken();
         const [pubRes, draftRes] = await Promise.all([
-          fetchMyBlogs(freshToken),
-          fetchMyDrafts(freshToken),
+          fetchMyBlogs(freshToken, ac.signal, 0, PAGE_LIMIT),
+          fetchMyDrafts(freshToken, ac.signal, 0, PAGE_LIMIT),
         ]);
-        setBlogs(pubRes.data);
-        setDrafts(draftRes.data);
+        setBlogs(pubRes.data.items);
+        setBlogsTotal(pubRes.data.total);
+        setDrafts(draftRes.data.items);
+        setDraftsTotal(draftRes.data.total);
       } catch (err) {
-        console.error("Blog load error:", err);
+        if (err.name !== "CanceledError") console.error("Blog load error:", err);
       } finally {
         setLoading(false);
       }
     };
     load();
+    return () => ac.abort();
   }, [user]);
 
   const handleEditBlog = (blog) => {
@@ -74,7 +84,7 @@ export default function MyBlogsPage() {
       return;
     setDeletingId(blogId);
     try {
-      const freshToken = await auth.currentUser.getIdToken(true);
+      const freshToken = await getToken();
       await deleteBlog(freshToken, blogId);
       if (isDraft) {
         setDrafts((prev) => prev.filter((d) => d.id !== blogId));
@@ -93,7 +103,7 @@ export default function MyBlogsPage() {
   const handlePublish = async (title, content, tags) => {
     if (!title.trim() || !content.trim()) return;
     try {
-      const freshToken = await auth.currentUser.getIdToken(true);
+      const freshToken = await getToken();
       if (editingBlog?.id) {
         await fetch(`${BASE_URL}/blogs/${editingBlog.id}/publish`, {
           method: "POST",
@@ -135,7 +145,7 @@ export default function MyBlogsPage() {
   const handleSaveDraft = async (title, content, tags) => {
     if (!title.trim() || !content.trim()) return;
     try {
-      const freshToken = await auth.currentUser.getIdToken(true);
+      const freshToken = await getToken();
       const res = await fetch(`${BASE_URL}/blogs/draft`, {
         method: "POST",
         headers: {
@@ -158,7 +168,7 @@ export default function MyBlogsPage() {
 
   const handlePublishDraft = async (blogId) => {
     try {
-      const freshToken = await auth.currentUser.getIdToken(true);
+      const freshToken = await getToken();
       await publishDraft(freshToken, blogId);
       const published = drafts.find((d) => d.id === blogId);
       setDrafts((prev) => prev.filter((d) => d.id !== blogId));
@@ -167,6 +177,34 @@ export default function MyBlogsPage() {
     } catch (err) {
       console.error("Publish draft error:", err);
       showToast("Failed to publish draft.", "error");
+    }
+  };
+
+  const handleLoadMorePublished = async () => {
+    setLoadingMorePub(true);
+    try {
+      const freshToken = await getToken();
+      const res = await fetchMyBlogs(freshToken, new AbortController().signal, blogs.length, PAGE_LIMIT);
+      setBlogs((prev) => [...prev, ...res.data.items]);
+      setBlogsTotal(res.data.total);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingMorePub(false);
+    }
+  };
+
+  const handleLoadMoreDrafts = async () => {
+    setLoadingMoreDraft(true);
+    try {
+      const freshToken = await getToken();
+      const res = await fetchMyDrafts(freshToken, new AbortController().signal, drafts.length, PAGE_LIMIT);
+      setDrafts((prev) => [...prev, ...res.data.items]);
+      setDraftsTotal(res.data.total);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingMoreDraft(false);
     }
   };
 
@@ -276,6 +314,17 @@ export default function MyBlogsPage() {
                 </div>
               </div>
             ))}
+            {!loading && blogsTotal > blogs.length && (
+              <div className="pagination-wrap">
+                <button
+                  className="load-more-btn"
+                  onClick={handleLoadMorePublished}
+                  disabled={loadingMorePub}
+                >
+                  {loadingMorePub ? "Loading..." : `Load More (${blogs.length} / ${blogsTotal})`}
+                </button>
+              </div>
+            )}
           </div>
         )}
 
@@ -317,6 +366,17 @@ export default function MyBlogsPage() {
                 </div>
               </div>
             ))}
+            {!loading && draftsTotal > drafts.length && (
+              <div className="pagination-wrap">
+                <button
+                  className="load-more-btn"
+                  onClick={handleLoadMoreDrafts}
+                  disabled={loadingMoreDraft}
+                >
+                  {loadingMoreDraft ? "Loading..." : `Load More (${drafts.length} / ${draftsTotal})`}
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>

@@ -6,7 +6,7 @@ import {
   toggleFollow,
   getFollowStatus,
 } from "../api/blogApi";
-import { auth } from "../firebase/firebase";
+import { getToken } from "../services/auth";
 import BlogCard from "../components/BlogCard";
 import "./ProfilePage.css";
 
@@ -23,24 +23,26 @@ export default function ProfilePage() {
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
   useEffect(() => {
+    const ac = new AbortController();
     const load = async () => {
       try {
-        const res = await getPublicProfile(username);
+        const res = await getPublicProfile(username, ac.signal);
         setProfile(res.data);
         setFollowerCount(res.data.follower_count || 0);
 
         if (user && res.data.firebase_uid) {
-          const token = await auth.currentUser.getIdToken(true);
-          const followRes = await getFollowStatus(token, res.data.firebase_uid);
+      const token = await getToken();
+      const followRes = await getFollowStatus(token, res.data.firebase_uid, ac.signal);
           setFollowing(followRes.data.following);
         }
-      } catch {
-        setError("User not found.");
+      } catch (err) {
+        if (err.name !== "CanceledError") setError("User not found.");
       } finally {
         setLoading(false);
       }
     };
     load();
+    return () => ac.abort();
   }, [username, user]);
 
   const handleFollow = async () => {
@@ -50,7 +52,7 @@ export default function ProfilePage() {
     }
     setFollowLoading(true);
     try {
-      const token = await auth.currentUser.getIdToken(true);
+      const token = await getToken();
       const res = await toggleFollow(token, profile.firebase_uid);
       setFollowing(res.data.following);
       setFollowerCount(res.data.follower_count);

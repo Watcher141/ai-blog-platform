@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { auth } from "../firebase/firebase";
+import { getToken } from "../services/auth";
 import "./SEOPanel.css";
 
 const BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
@@ -13,7 +13,7 @@ export default function SEOPanel({ title, content }) {
     setLoading(true);
     setOpen(true);
     try {
-      const freshToken = await auth.currentUser.getIdToken(true);
+      const freshToken = await getToken();
       const res = await fetch(`${BASE_URL}/blogs/seo`, {
         method: "POST",
         headers: {

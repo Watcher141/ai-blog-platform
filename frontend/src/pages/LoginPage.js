@@ -4,13 +4,11 @@ import { useNavigate, Link } from "react-router-dom";
 import "../styles/auth.css";
 import {
   loginUser,
-  loginWithGoogle,
-  getToken,
-  logoutUser,
 } from "../firebase/authService";
 import { setUser } from "../features/authSlice";
 import { getMyProfile } from "../api/blogApi";
-import { auth } from "../firebase/firebase";
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -19,15 +17,14 @@ export default function LoginPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const dispatchUser = async (firebaseUser) => {
-    const token = await getToken();
+  const dispatchUser = async (userData, token) => {
     dispatch(
       setUser({
         user: {
-          uid: firebaseUser.uid,
-          email: firebaseUser.email,
-          displayName: firebaseUser.displayName,
-          photoURL: firebaseUser.photoURL,
+          id: userData.id,
+          uid: userData.id,
+          email: userData.email,
+          displayName: userData.displayName,
         },
         token,
       }),
@@ -37,24 +34,20 @@ export default function LoginPage() {
 
   const handleLogin = async () => {
     setError("");
+    if (!email || !EMAIL_RE.test(email)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+    if (!password) {
+      setError("Password is required.");
+      return;
+    }
     try {
-      const res = await loginUser(email, password);
+      const { user, token } = await loginUser(email, password);
+      await dispatchUser(user, token);
 
-      // Block unverified emails
-      if (!res.user.emailVerified) {
-        await logoutUser();
-        setError(
-          "Please verify your email before logging in. Check your inbox.",
-        );
-        return;
-      }
-
-      await dispatchUser(res.user);
-
-      // Check if profile exists — redirect to create if not
       try {
-        const freshToken = await auth.currentUser.getIdToken(true);
-        const profileRes = await getMyProfile(freshToken);
+        const profileRes = await getMyProfile(token);
         if (!profileRes.data) {
           navigate("/profile/edit");
         } else {
@@ -69,27 +62,7 @@ export default function LoginPage() {
   };
 
   const handleGoogle = async () => {
-    setError("");
-    try {
-      const res = await loginWithGoogle();
-      //Google accounts are always verified
-      await dispatchUser(res.user);
-
-      //Check if profile exists
-      try {
-        const freshToken = await auth.currentUser.getIdToken(true);
-        const profileRes = await getMyProfile(freshToken);
-        if (!profileRes.data) {
-          navigate("/profile/edit");
-        } else {
-          navigate("/");
-        }
-      } catch {
-        navigate("/profile/edit");
-      }
-    } catch {
-      setError("Google login failed.");
-    }
+    setError("Google login is not available with the current auth provider.");
   };
 
   const handleKey = (e) => {

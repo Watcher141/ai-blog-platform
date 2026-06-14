@@ -1,23 +1,40 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-// import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+const FIREBASE_CONFIG = process.env.REACT_APP_FIREBASE_CONFIG;
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
-  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.REACT_APP_FIREBASE_APP_ID,
-  measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID,
-};
+let firebaseApp = null;
+let firebaseAuth = null;
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-// const analytics = getAnalytics(app);
-export const auth = getAuth(app);
+try {
+  if (FIREBASE_CONFIG) {
+    const config = JSON.parse(FIREBASE_CONFIG);
+    const { initializeApp } = require("firebase/app");
+    const { getAuth, connectAuthEmulator } = require("firebase/auth");
+
+    firebaseApp = initializeApp(config);
+    firebaseAuth = getAuth(firebaseApp);
+
+    if (process.env.REACT_APP_FIREBASE_EMULATOR) {
+      connectAuthEmulator(
+        firebaseAuth,
+        process.env.REACT_APP_FIREBASE_EMULATOR,
+      );
+    }
+
+    console.log("[Firebase] Client SDK initialized");
+  } else {
+    console.log(
+      "[Firebase] No REACT_APP_FIREBASE_CONFIG set — Firebase auth disabled. Set it in .env to enable.",
+    );
+  }
+} catch (e) {
+  console.warn("[Firebase] Failed to initialize Firebase client:", e.message);
+}
+
+export function getFirebaseAuth() {
+  return firebaseAuth;
+}
+
+export function isFirebaseAvailable() {
+  return firebaseApp !== null && firebaseAuth !== null;
+}
+
+export { firebaseApp, firebaseAuth };

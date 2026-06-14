@@ -2,11 +2,11 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { fetchBlog, summarizeBlog, updateCoverImage } from "../api/blogApi";
 import { useSelector } from "react-redux";
-import { auth } from "../firebase/firebase";
+import { getToken } from "../services/auth";
+import { titleToGradient } from "../utils/gradient";
 import SEOPanel from "../components/SEOPanel";
 import LikeButton from "../components/LikeButton";
 import CommentSection from "../components/CommentSection";
-import useUnsplash from "../hooks/useUnsplash";
 import "./BlogViewPage.css";
 
 export default function BlogViewPage() {
@@ -21,52 +21,41 @@ export default function BlogViewPage() {
   const [showImagePicker, setShowImagePicker] = useState(false);
   const [pickerQuery, setPickerQuery] = useState("");
   const user = useSelector((state) => state.auth.user);
-  const { images, loading: imgLoading, searchImages } = useUnsplash();
 
   useEffect(() => {
+    const ac = new AbortController();
     const load = async () => {
       try {
-        const res = await fetchBlog(id);
+        const res = await fetchBlog(id, ac.signal);
         setBlog(res.data);
-      } catch {
-        setError("Blog not found.");
+      } catch (err) {
+        if (err.name !== "CanceledError") setError("Blog not found.");
       } finally {
         setLoading(false);
       }
     };
     load();
+    return () => ac.abort();
   }, [id]);
 
   useEffect(() => {
     if (!blog) return;
 
-    // Use saved cover image if exists
     if (blog.cover_image) {
       setHeroImage({
         url: blog.cover_image,
         alt: blog.title,
-        author: null,
-        authorLink: null,
       });
       return;
     }
-
-    // Otherwise fetch from Unsplash
-    searchImages(blog.title || "blog writing", 1).then((results) => {
-      if (results[0]) setHeroImage(results[0]);
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [blog]);
 
-  // Only author can change image
   const isAuthor = user && blog?.user_id && user.uid === blog.user_id;
 
-  // Save image to DB
   const handleSaveImage = async (img) => {
     try {
-      const token = await auth.currentUser.getIdToken(true);
+      const token = await getToken();
       await updateCoverImage(token, parseInt(id), img.url);
-      // Update blog state so cover_image reflects the new value
       setBlog((prev) => ({ ...prev, cover_image: img.url }));
       setHeroImage(img);
       setShowImagePicker(false);
@@ -115,21 +104,16 @@ export default function BlogViewPage() {
       {/* Hero Image */}
       {heroImage && (
         <div className="blogview-hero">
-          <img src={heroImage.url} alt={heroImage.alt} />
+          {heroImage.url ? (
+            <img src={heroImage.url} alt={heroImage.alt} />
+          ) : (
+            <div
+              className="blogview-hero blogview-hero-fallback"
+              style={{ background: titleToGradient(blog?.title || "") }}
+            />
+          )}
           <div className="blogview-hero-fade" />
 
-          {/* Only show credit for Unsplash images */}
-          {heroImage.author && (
-            <div className="blogview-hero-credit">
-              Photo by{" "}
-              <a href={heroImage.authorLink} target="_blank" rel="noreferrer">
-                {heroImage.author}
-              </a>{" "}
-              on Unsplash
-            </div>
-          )}
-
-          {/* Only author sees Change Image button */}
           {isAuthor && (
             <button
               className="blogview-change-img"
@@ -141,38 +125,26 @@ export default function BlogViewPage() {
         </div>
       )}
 
-      {/* Image Picker — only for author, saves to DB on click */}
       {showImagePicker && isAuthor && (
         <div className="blogview-img-picker">
           <div className="container">
             <div className="img-picker-search">
               <input
                 className="img-picker-input"
-                placeholder="Search for an image..."
+                placeholder="Paste image URL..."
                 value={pickerQuery}
                 onChange={(e) => setPickerQuery(e.target.value)}
-                onKeyDown={(e) =>
-                  e.key === "Enter" && searchImages(pickerQuery, 6)
-                }
               />
               <button
                 className="img-picker-btn"
-                onClick={() => searchImages(pickerQuery, 6)}
-                disabled={imgLoading}
+                onClick={() => {
+                  if (pickerQuery.trim()) {
+                    handleSaveImage({ url: pickerQuery.trim(), alt: blog?.title || "" });
+                  }
+                }}
               >
-                {imgLoading ? "Searching..." : "Search"}
+                Set Image
               </button>
-            </div>
-            <div className="img-picker-grid">
-              {images.map((img, i) => (
-                <div
-                  key={i}
-                  className="img-picker-item"
-                  onClick={() => handleSaveImage(img)}
-                >
-                  <img src={img.thumb} alt={img.alt} />
-                </div>
-              ))}
             </div>
           </div>
         </div>

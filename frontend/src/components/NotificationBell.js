@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { auth } from "../firebase/firebase";
+import { getToken } from "../services/auth";
 import {
   getNotifications,
   getUnreadCount,
@@ -19,23 +19,23 @@ export default function NotificationBell() {
 
   useEffect(() => {
     if (!user) return;
+    const ac = new AbortController();
     const load = async () => {
       try {
-        const token = await auth.currentUser.getIdToken(true);
+        const token = await getToken();
         const [notifRes, countRes] = await Promise.all([
-          getNotifications(token),
-          getUnreadCount(token),
+          getNotifications(token, ac.signal),
+          getUnreadCount(token, ac.signal),
         ]);
         setNotifications(notifRes.data);
         setUnread(countRes.data.count);
       } catch (err) {
-        console.error(err);
+        if (err.name !== "CanceledError") console.error(err);
       }
     };
     load();
-    // Poll every 30 seconds
     const interval = setInterval(load, 30000);
-    return () => clearInterval(interval);
+    return () => { clearInterval(interval); ac.abort(); };
   }, [user]);
 
   // Close on outside click
@@ -51,7 +51,7 @@ export default function NotificationBell() {
     setOpen(!open);
     if (!open && unread > 0) {
       try {
-        const token = await auth.currentUser.getIdToken(true);
+        const token = await getToken();
         await markNotificationsRead(token);
         setUnread(0);
         setNotifications((prev) =>

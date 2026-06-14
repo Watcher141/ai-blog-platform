@@ -2,9 +2,8 @@ import "./Navbar.css";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../features/authSlice";
-import { logoutUser } from "../firebase/authService";
+import { logoutUser, getToken } from "../services/auth";
 import { useEffect, useState } from "react";
-import { auth } from "../firebase/firebase";
 import { getMyProfile } from "../api/blogApi";
 import NotificationBell from "./NotificationBell";
 
@@ -20,20 +19,22 @@ export default function Navbar() {
       setProfile(null);
       return;
     }
+    const ac = new AbortController();
     const load = async () => {
       try {
-        const token = await auth.currentUser.getIdToken(true);
-        const res = await getMyProfile(token);
+        const token = await getToken();
+        const res = await getMyProfile(token, ac.signal);
         setProfile(res.data);
-      } catch {
-        setProfile(null);
+      } catch (err) {
+        if (err.name !== "CanceledError") setProfile(null);
       }
     };
     load();
+    return () => ac.abort();
   }, [user]);
 
   const handleLogout = async () => {
-    await logoutUser();
+    logoutUser();
     dispatch(logout());
     navigate("/");
     setMenuOpen(false);

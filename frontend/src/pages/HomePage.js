@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { fetchBlogs, searchBlogs } from "../api/blogApi";
 import BlogCard from "../components/BlogCard";
 import BlogGenerator from "../components/BlogGenerator";
@@ -7,45 +7,80 @@ import { useSelector } from "react-redux";
 import Footer from "../components/Footer"; // adjust path
 import "./HomePage.css";
 
+const PAGE_LIMIT = 8;
+
 export default function HomePage() {
   const [blogs, setBlogs] = useState([]);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState("");
   const [query, setQuery] = useState("");
   const [searching, setSearching] = useState(false);
   const user = useSelector((state) => state.auth.user);
 
   useEffect(() => {
+    const ac = new AbortController();
     const load = async () => {
       try {
-        const res = await fetchBlogs();
-        setBlogs(res.data);
+        const res = await fetchBlogs(ac.signal, 0, PAGE_LIMIT);
+        setBlogs(res.data.items);
+        setTotal(res.data.total);
       } catch (err) {
-        console.error(err);
-        setError("Failed to load blogs");
+        if (err.name !== "CanceledError") {
+          console.error(err);
+          setError("Failed to load blogs");
+        }
       } finally {
         setLoading(false);
       }
     };
     load();
+    return () => ac.abort();
   }, []);
 
+  const handleLoadMore = async () => {
+    setLoadingMore(true);
+    try {
+      const ac = new AbortController();
+      const res = query.trim()
+        ? await searchBlogs(query, ac.signal, blogs.length, PAGE_LIMIT)
+        : await fetchBlogs(ac.signal, blogs.length, PAGE_LIMIT);
+      setBlogs((prev) => [...prev, ...res.data.items]);
+      setTotal(res.data.total);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
+  const searchRef = useRef(null);
   const handleSearch = useCallback(async (e) => {
     const q = e.target.value;
     setQuery(q);
+    if (searchRef.current) searchRef.current.abort();
 
     if (!q.trim()) {
-      const res = await fetchBlogs();
-      setBlogs(res.data);
+      searchRef.current = new AbortController();
+      try {
+        const res = await fetchBlogs(searchRef.current.signal, 0, PAGE_LIMIT);
+        setBlogs(res.data.items);
+        setTotal(res.data.total);
+      } catch (err) {
+        if (err.name !== "CanceledError") console.error(err);
+      }
       return;
     }
 
     setSearching(true);
+    searchRef.current = new AbortController();
     try {
-      const res = await searchBlogs(q);
-      setBlogs(res.data);
+      const res = await searchBlogs(q, searchRef.current.signal, 0, PAGE_LIMIT);
+      setBlogs(res.data.items);
+      setTotal(res.data.total);
     } catch (err) {
-      console.error(err);
+      if (err.name !== "CanceledError") console.error(err);
     } finally {
       setSearching(false);
     }
@@ -142,6 +177,18 @@ export default function HomePage() {
             </div>
           ))}
         </div>
+
+        {!loading && total > blogs.length && (
+          <div className="pagination-wrap">
+            <button
+              className="load-more-btn"
+              onClick={handleLoadMore}
+              disabled={loadingMore}
+            >
+              {loadingMore ? "Loading..." : `Load More (${blogs.length} / ${total})`}
+            </button>
+          </div>
+        )}
       </div>
       <Footer />
     </div>

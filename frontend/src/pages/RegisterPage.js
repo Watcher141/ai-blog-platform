@@ -1,24 +1,34 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import "../styles/auth.css";
-import { registerUser } from "../firebase/authService";
+import { registerUser } from "../services/auth";
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function validateForm(email, password, confirm) {
+  if (!email || !EMAIL_RE.test(email)) return "Invalid email format";
+  if (!password || password.length < 8) return "Password must be at least 8 characters";
+  if (!/[A-Za-z]/.test(password)) return "Password must contain at least one letter";
+  if (!/[0-9]/.test(password)) return "Password must contain at least one digit";
+  if (password !== confirm) return "Passwords do not match";
+  return null;
+}
 
 export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
   const [error, setError] = useState("");
   const [done, setDone] = useState(false);
   const navigate = useNavigate();
 
   const handleRegister = async () => {
     setError("");
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters.");
-      return;
-    }
+    const err = validateForm(email, password, confirm);
+    if (err) { setError(err); return; }
     try {
       await registerUser(email, password);
-      setDone(true); // show verification message
+      setDone(true);
     } catch (err) {
       setError(err.message || "Registration failed.");
     }
@@ -80,10 +90,20 @@ export default function RegisterPage() {
         <div className="auth-field">
           <input
             className="auth-input"
-            placeholder="Password (min 6 chars)"
+            placeholder="Password (min 8 chars, letter + digit)"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            onKeyDown={handleKey}
+          />
+        </div>
+        <div className="auth-field">
+          <input
+            className="auth-input"
+            placeholder="Confirm password"
+            type="password"
+            value={confirm}
+            onChange={(e) => setConfirm(e.target.value)}
             onKeyDown={handleKey}
           />
         </div>
