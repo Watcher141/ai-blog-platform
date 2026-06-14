@@ -17,3 +17,6 @@ frontend/.env.production
 .DS_Store
 Thumbs.db
 *.production
+PROGRESS.md
+Phases.txt
+backend/app.log
