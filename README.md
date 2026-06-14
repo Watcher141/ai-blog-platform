@@ -239,7 +239,7 @@ npm start
 
 <div align="center">
 
-**Built with** 🩶 **by [Watcher141](https://github.com/Watcher141)**
+**Built with** 🩶 **by [Watcher141](https://github.com/Watcher141) & [Insane-11](https://github.com/Insane-11)**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
