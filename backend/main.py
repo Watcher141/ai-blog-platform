@@ -46,6 +46,7 @@ origins = [
     "https://ai-blog-platform-eohe.vercel.app",
     "https://ai-blog-platform-eohe-8uqjodomm-monojit-das-projects.vercel.app",
     "https://ai-blog-platform-green.vercel.app",
+    "https://ai-blog-backend-ytfj.onrender.com",
 ]
 
 app.add_middleware(
